@@ -8,12 +8,12 @@
 ### Basic Info ###
 
 # The BBS is a long-term, large-scale, international avian monitoring program initiated in 1966 to track the status and trends of North American bird populations.
-# 
 
 
 ### Dataset:
 # routes length: 25.4 miles (= ~ 39.42893 km)
 # stops distance: 0.5 mile (= ~ 804.672 m)
+# 50 stops in each transect
 # 3 minute point count at each stop
 # record in radius of 0.25 mile (= ~ 402.336 m)
 # number of transects: 4100+
@@ -34,8 +34,11 @@ library(tidyverse) # for data transformations
 library(sf) # for spatial data manipulations
 library(here) # for selecting the file path within the project
 
-# Downloading data --------------------------------------------------------
+# Downloading & exploring data --------------------------------------------------------
 
 bbs <- grab_bbs_data()
 names(bbs)
 View(bbs)
+View(bbs$observations)
+str(bbs$observations)
+head(bbs$species_list,10)
