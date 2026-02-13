@@ -1,4 +1,3 @@
-
 # BBS-syntopy project outline ---------------------------------------------
 # Matěj Tvarůžka
 
@@ -26,47 +25,154 @@ ls("package:bbsAssistant") # view functions and data in package bbsAssistant
 
 
 
-# Step 1: Downloading & tiding data --------------------------------------------------------
+# ============================================================
+# 0. Libraries
+# ============================================================
 
-library(tidyverse) # for data transformations
-library(sf) # for spatial data manipulations
-library(here) # for selecting the file path within the project
+library(tidyverse)
+library(sf)
 
-# Downloading the data in the form of list
+
+# ============================================================
+# 1. Load BBS data and subset to 2018
+# ============================================================
+
 bbs <- grab_bbs_data()
-names(bbs)
-head(bbs$species_list,10)
-head(bbs$observations)
-head(bbs$routes)
-str(bbs$observations)
 
-# Convert route coordinates to an sf object
-routes_sf <- bbs$routes |> 
-  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) # WGS84
+bbs_2018 <- bbs$observations %>%
+  filter(Year == 2018)
 
-bbs_data <- bbs$observations |> 
-  filter(Year %in% c(2017, 2018, 2019)) |> 
-  pivot_longer(
-    cols = starts_with("Stop"),
-    names_to = "Stop_Number",
-    values_to = "Count"
-  ) |> 
+# ============================================================
+# 2. Prepare route metadata (points)
+# ============================================================
+
+routes_sf <- bbs$routes %>%
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326)
+
+# ============================================================
+# 3. Join observations to routes (attribute join)
+# ============================================================
+
+bbs_joined <- routes_sf %>%
+  left_join(
+    bbs_2018,
+    by = c("RTENO", "CountryNum", "StateNum", "Route")
+  )
+
+# ============================================================
+# 4. Compute species presence per route
+# ============================================================
+
+stop_cols <- paste0("Stop", 1:50)
+
+bbs_presence <- bbs_joined %>%
   mutate(
-    Stop_PA = if_else(!is.na(Count) & Count > 0, 1L, 0L)
+    present = rowSums(across(all_of(stop_cols)), na.rm = TRUE) > 0,
+    present = as.integer(present)
+  ) %>%
+  filter(present == 1)
+
+# ============================================================
+# 5. Compute species richness per route
+# ============================================================
+
+route_richness <- bbs_presence %>%
+  group_by(RTENO) %>%
+  summarise(
+    species_richness = n_distinct(AOU),
+    .groups = "drop"
+  ) %>%
+  st_drop_geometry()
+
+# ============================================================
+# 6. Create route metadata table (one row per route)
+# ============================================================
+
+route_meta <- bbs_presence %>%
+  distinct(
+    RTENO,
+    RouteName,
+    StateNum,
+    Route,
+    CountryNum,
+    geometry
   )
 
-# Join routes with observations
-bbs_data <- routes_sf |> 
-  left_join(bbs_data, by = c("RTENO", "CountryNum", "StateNum", "Route"))
+# ============================================================
+# 7. Join richness back to route metadata
+# ============================================================
 
-bbs_data <- bbs_data |> 
-  filter(Active == 1) |> 
-  select(RTENO, Year, AOU, geometry, Stop_PA, everything(), 
-         -RouteName, -(RouteDataID:RPID), -(Active:RouteTypeDetailID), -Count, -(CountryNum:Route))
-bbs_data
-bbs_data_wider <- bbs_data |> 
-  pivot_wider(
-    names_from  = Stop_Number,
-    values_from = Stop_PA
+routes_final <- route_meta %>%
+  left_join(route_richness, by = "RTENO")
+
+
+# ============================================================
+# 10. Final selection and sanity checks
+# ============================================================
+
+routes_final <- routes_final %>%
+  select(
+    RTENO,
+    RouteName,
+    StateNum,
+    Route,
+    CountryNum,
+    species_richness,
+    geometry
   )
-bbs_data_wider
+head(routes_final)
+# Quick checks
+summary(routes_final$species_richness)
+nrow(routes_final)
+
+routes_lines <- read_sf("routes_geometry/vy474dv5024.shp")
+head(routes_lines)
+routes_lines$rteno
+routeroutes_linesroutes_lines <- routes_lines %>%
+  mutate(RTENO_clean = as.character(RTENO))
+plot(routes_lines)
+
+# Function to check if a column is unique
+# Explore which columns are unique
+sapply(routes_lines, function(x) length(unique(x)))
+sapply(routes_final, function(x) length(unique(x)))
+
+
+routes_final <- routes_final %>%
+  left_join(
+    routes_lines %>% select(RTENO_clean, geometry),
+    by = "RTENO_clean",
+    suffix = c("_pt", "")
+  ) %>%
+  st_drop_geometry() %>%
+  st_as_sf(crs = 4326)
+
+
+# Ensure both layers use the same CRS
+routes_lines <- st_transform(routes_lines, 4326)
+routes_final <- st_transform(routes_final, 4326)
+
+
+# Spatial join: add point attributes to lines
+routes_spatial_join <- st_join(
+  routes_lines,
+  routes_final,
+  join = st_nearest_feature # finds the nearest point for each line
+)
+routes_spatial_join <- routes_spatial_join |> 
+  select(RTENO, RouteName, CountryNum, StateNum, Route, species_richness, length, geometry)
+
+library(ggplot2)
+
+ggplot() +
+  geom_sf(data = routes_spatial_join, color = "green", size = 1)
+# ============================================================
+# 11. Write output for Python
+# ============================================================
+
+st_write(
+  routes_final,
+  "bbs_routes_2018_route_level.gpkg",
+  layer = "routes",
+  delete_dsn = TRUE
+)
