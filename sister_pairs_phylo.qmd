@@ -1,0 +1,74 @@
+---
+title: "Sister pairs selection for syntopy analysis"
+author: "Matěj Tvarůžka"
+format: html
+---
+
+In this code I will select sister species pairs of North American passerines for the subsequent analysis of syntopy.
+
+```{r}
+#| include: false
+require(diverge)
+require(clootl)
+require(tidyverse)
+```
+
+Firstly we are going to select the phylogeny of wood-warblers to try the workflow. We can get the acces to eBird taxonomy files using `taxonomyGet()`.
+
+```{r}
+#| include: false
+taxonomy <- taxonomyGet(taxonomy_year = 2021)
+taxonomy
+```
+
+With the taxonomy loaded, we select the family of **wood-warblers** (*Parulidae*).
+
+```{r}
+warblers <- taxonomy |> 
+  filter(FAMILY == "Parulidae (New World Warblers)")
+head(warblers)
+```
+
+We need to select only the species code vector for the tree extraction:
+
+```{r}
+#| echo: true
+warb_codes <- warblers |> 
+  select(SPECIES_CODE) |> 
+  pull(SPECIES_CODE)
+str(warb_codes)
+```
+
+```{r}
+tree <- extractTree(species = "all_species", taxonomy_year = 2021)
+tree
+```
+
+A character vector either of scientific names (directly as they come out of the eBird taxonomy, i.e. without underscores) or of six-letter eBird species codes. Any elements of the species vector that do not match a species-level taxon in the specified eBird taxonomy will result in an error. eBird taxonomy files can be accessed using taxonomyGet(). Default is set to "all_species".
+
+```{r}
+#| eval: false
+#| include: false
+# Explicitly pass the character vector to the 'tip' argument
+tree_warb <- keep.tip(phy = tree, tip = warb_codes)
+```
+Error in keep.tip.phylo(phy = tree, tip = warb_codes) :
+unmatched tip labels:
+ovenbi1 woewar1 louwat norwat bacwar gowwar buwwar bawwar prowar swawar crcwar fltwar1 tenwar orcwar colwar lucwar naswar virwar semwar1 conwar gycyel masyel1 macwar mouwar kenwar olcyel1 blpyel1 belyel1 bahyel1 altyel1 comyel hooyel1 whiwar1 pluwar1 elwwar1 arrwar1 hoowar amered kirwar camwar cerwar norpar tropar magwar babwar bkbwar yelwar chswar bkpwar btbwar palwar olcwar1 pinwar yerwar yetwar yetwar3 vitwar1 prawar adewar1 barwar stlwar grawar btywar towwar herwar gchwar btnwar fatwar rucwar rucwar4 blcwar1 pirwar1 gobwar1 gcrwar thswar5 thswar9 thswar1 thbwar2 gyhwar1 samwar1 citwar1 whswar2 flawar1 whbwar2 palwar1 blcwar2 burwar1 rivwar1 twbwar1 gobwar2 gytwar1 whlwar1 gagwar2 rucwar1 canwar wlswar refwar redwar1 pihwar1 paired sltred brcred1 tepred1 parred1 sabred1 whfred1 colred1 yecred1 gofred1 spered1 whfred2
+
+
+
+
+Now it's time to extract species pairs:
+
+```{r}
+#| eval: false
+#| include: false
+# Extract sister pairs from your ladderized tree
+sister_spp_df <- extract_sisters(your_tree_ladderized)
+
+# Format the dataframe for analysis
+names(sister_spp_df) <- c("tree_node", "sp2", "sp1")
+sister_spp_df <- sister_spp_df %>%
+  unite(col = sp_id, sp1, sp2, sep = "_", remove = FALSE)
+```
