@@ -76,7 +76,7 @@ We can plot it using `ape` package.
 plot(tree, type = "fan", cex = 1.5, tip.color = "darkblue")
 ```
 
-Now it's time to extract species pairs:
+Now it's time to extract species pairs using function `extract_sisters()` from `diverge` package:
 
 ```{r}
 sister_pairs <- extract_sisters(tree)
