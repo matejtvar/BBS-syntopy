@@ -47,10 +47,15 @@ tree <- extractTree(species = warb_names_vec, taxonomy_year = 2021)
 tree
 ```
 
+We can plot it using `ape` package.
+
+```{r}
+plot(tree, type = "fan", cex = 0.5, tip.color = "darkblue")
+```
+
 Now it's time to extract species pairs:
 
 ```{r}
 sister_pairs <- extract_sisters(tree)
 head(sister_pairs)
 ```
-
