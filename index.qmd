@@ -1,5 +1,5 @@
 ---
-title: "Sister pairs selection for syntopy analysis"
+title: "Syntopy Analysis with BBS"
 author: "Matěj Tvarůžka"
 format: html
 theme: cerulean
