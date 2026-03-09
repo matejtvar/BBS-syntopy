@@ -1,0 +1,30 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Syntopy in North American Passerines"
+  description: "Spatial Analysis of BBS Data"
+  
+  navbar:
+    background: primary
+    search: false 
+    right:
+      - text: "Portfolio"
+        href: "https://matejtvar.github.io/"
+      - icon: github
+        text: ""
+        href: "https://github.com/matejtvar/BBS-syntopy"
+
+  page-footer:
+    left: "© 2026 Matěj Tvarůžka"
+    right: "Built with Python & Quarto"
+
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    toc: true
+    grid:
+      body-width: 1100px

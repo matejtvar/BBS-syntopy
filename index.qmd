@@ -1,0 +1,61 @@
+---
+title: "Sister pairs selection for syntopy analysis"
+author: "Matěj Tvarůžka"
+format: html
+---
+
+# Sister pairs extraction
+
+In this code I will select sister species pairs of North American passerines for the subsequent analysis of syntopy.
+
+```{r}
+#| label: Libraries
+#| include: false
+require(diverge)
+require(clootl)
+require(tidyverse)
+require(ape)
+```
+
+Firstly we are going to select the phylogeny of wood-warblers to try the workflow. We can get the acces to eBird taxonomy files using `taxonomyGet()`, than we select the family of **wood-warblers** (*Parulidae*).
+
+```{r}
+#| include: false
+#| label: Taxonomy
+taxonomy <- taxonomyGet(taxonomy_year = 2021)
+warblers <- taxonomy |> 
+  filter(FAMILY == "Parulidae (New World Warblers)")
+head(warblers)
+```
+
+We need to select the species names vector for the tree extraction:
+
+```{r}
+#| echo: true
+#| label: Species names vector
+warb_names_vec <- warblers |> 
+  select(SCI_NAME) |> 
+  pull(SCI_NAME)
+glimpse(warb_names_vec)
+```
+
+We can extract the tree using `extractTree()` function from `clootl` package:
+
+```{r}
+#| label: Tree extraction
+tree <- extractTree(species = warb_names_vec, taxonomy_year = 2021)
+tree
+```
+
+We can plot it using `ape` package.
+
+```{r}
+plot(tree, type = "fan", cex = 0.5, tip.color = "darkblue")
+```
+
+Now it's time to extract species pairs:
+
+```{r}
+sister_pairs <- extract_sisters(tree)
+head(sister_pairs)
+```
