@@ -1,10 +1,11 @@
 project:
   type: website
-  output-dir: docs
 
 website:
   title: "Syntopy in North American Passerines"
   description: "Spatial Analysis of BBS Data"
+  repo-url: "https://github.com/matejtvar/BBS-syntopy/issues/new?assignees=matejtvar"
+  repo-actions: [issue]
   
   navbar:
     background: primary
@@ -22,9 +23,15 @@ website:
 
 format:
   html:
-    theme:
+    theme: 
       light: flatly
       dark: darkly
     toc: true
+    toc-location: right
+    number-sections: true
+    number-depth: 3
+    code-fold: true
+    code-summary: "View Code"
+    code-copy: true
     grid:
       body-width: 1100px
