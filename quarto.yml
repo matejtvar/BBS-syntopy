@@ -1,0 +1,38 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Syntopy in North American Passerines"
+  description: "Spatial Analysis of BBS Data"
+  # This links the 'Report an issue' button to your specific repo
+  repo-url: "https://github.com/matejtvar/BBS-syntopy/issues/new?assignees=matejtvar"
+  repo-actions: [issue]
+  
+  navbar:
+    background: primary
+    search: false 
+    right:
+      - text: "Portfolio"
+        href: "https://matejtvar.github.io/"
+      - icon: github
+        href: "https://github.com/matejtvar/BBS-syntopy"
+
+  page-footer:
+    left: "© 2026 Matěj Tvarůžka"
+    right: "Built with Python & Quarto"
+
+format:
+  html:
+    theme: 
+      light: flatly
+      dark: darkly
+    grid:
+      body-width: 1100px
+    toc: true
+    toc-location: right
+    number-sections: true
+    number-depth: 3
+    code-fold: true
+    code-summary: "View Code"
+    code-copy: true
