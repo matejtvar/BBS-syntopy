@@ -1,10 +1,23 @@
 ---
-title: "Syntopy Analysis with BBS"
+title: "Syntopy in North American Passerines"
+subtitle: "Spatial Analysis of BBS Data with R"
+date: last-modified
+categories: [Syntopy, Spatial Data, Birds, R, BBS]
 author: "Matěj Tvarůžka"
 format: html
-theme: flatly
-number-sections: true
 ---
+
+### Materials and Methods
+
+The study will use data from the **North American Breeding Bird Survey (BBS)**, a long-term, standardised monitoring programme that records bird assemblages across approximately 2,900 routes annually. Each route includes 50 point counts spaced at 0.5-mile intervals. I will analyse patterns of syntopy at two spatial resolutions:
+
+1.  **Point scale (individual stops) and**
+
+2.  **Transect scale** (combined stops along each route).
+
+To infer drivers of syntopy, I will replicate the analytical framework of Remeš & Harmáčková (2023), which uses cooccurrence analyses and species trait data to identify ecological predictors of coexistence. A novel feature of this thesis will be analysing syntopy at two spatial resolutions (see above).
+
+*Remeš, V. and Harmáčková, L. (2023), Resource use divergence facilitates the evolution of secondary syntopy in a continental radiation of songbirds (Meliphagoidea): insights from unbiased co-occurrence analyses. Ecography, 2023: e06268. https://doi.org/10.1111/ecog.06268*
 
 # Sister pairs extraction
 
