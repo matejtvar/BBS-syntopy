@@ -7,7 +7,7 @@ author: "Matěj Tvarůžka"
 format: html
 ---
 
-### Materials and Methods
+# Materials and Methods
 
 The study will use data from the **North American Breeding Bird Survey (BBS)**, a long-term, standardised monitoring programme that records bird assemblages across approximately 2,900 routes annually. Each route includes 50 point counts spaced at 0.5-mile intervals. I will analyse patterns of syntopy at two spatial resolutions:
 
@@ -19,7 +19,9 @@ To infer drivers of syntopy, I will replicate the analytical framework of Remeš
 
 *Remeš, V. and Harmáčková, L. (2023), Resource use divergence facilitates the evolution of secondary syntopy in a continental radiation of songbirds (Meliphagoidea): insights from unbiased co-occurrence analyses. Ecography, 2023: e06268. https://doi.org/10.1111/ecog.06268*
 
-# Sister pairs extraction
+# Data Preparation
+
+## Sister Pairs Extraction
 
 In this code I will select sister species pairs of North American passerines for the subsequent analysis of syntopy.
 
@@ -65,6 +67,8 @@ tree
 We can plot it using `ape` package.
 
 ```{r}
+#| fig-height: 15
+#| fig-width: 15
 plot(tree, type = "fan", cex = 0.5, tip.color = "darkblue")
 ```
 

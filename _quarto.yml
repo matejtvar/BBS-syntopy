@@ -31,7 +31,7 @@ format:
     toc-location: right
     number-sections: true
     number-depth: 3
-    code-fold: true
+    code-fold: false
     code-summary: "View Code"
     code-copy: true
     grid:
