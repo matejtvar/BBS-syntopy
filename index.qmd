@@ -2,6 +2,8 @@
 title: "Sister pairs selection for syntopy analysis"
 author: "Matěj Tvarůžka"
 format: html
+theme: cerulean
+number-sections: true
 ---
 
 # Sister pairs extraction
