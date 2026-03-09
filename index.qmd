@@ -25,7 +25,9 @@ To infer drivers of syntopy, I will replicate the analytical framework of Remeš
 
 ## Sister Pairs Extraction
 
-In this code I will select sister species pairs of North American passerines for the subsequent analysis of syntopy.
+In this code I will select sister species pairs of North American passerines for the subsequent analysis of syntopy using these packages:
+
+`clootl`, `diverge`, `tidyverse` and `ape`.
 
 ```{r}
 #| label: Libraries
