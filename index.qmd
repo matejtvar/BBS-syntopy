@@ -39,12 +39,11 @@ require(ape)
 Firstly we are going to select the phylogeny of wood-warblers to try the workflow. We can get the acces to eBird taxonomy files using `taxonomyGet()`, than we select the family of **wood-warblers** (*Parulidae*).
 
 ```{r}
-#| include: false
 #| label: Taxonomy
 taxonomy <- taxonomyGet(taxonomy_year = 2021)
 warblers <- taxonomy |> 
   filter(FAMILY == "Parulidae (New World Warblers)")
-head(warblers)
+glimpse(warblers)
 ```
 
 We need to select the species names vector for the tree extraction:

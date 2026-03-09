@@ -392,21 +392,152 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="sister-pairs-extraction" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="sister-pairs-extraction"><span class="header-section-number">1.1</span> Sister Pairs Extraction</h2>
 <p>In this code I will select sister species pairs of North American passerines for the subsequent analysis of syntopy.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(diverge)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: diverge</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'diverge' was built under R version 4.4.3</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(clootl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: clootl</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ape</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ape' was built under R version 4.4.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>To cite package 'clootl' in publications use:
+
+  Miller E, McTavish E, Sanchez-Reyes L (2025). "clootl: Fetch and
+  Explore the Cornell Lab of Ornithology Open Tree of Life Avian
+  Phylogeny." &lt;https://github.com/eliotmiller/clootl&gt;.
+
+  McTavish E, Gerbracht J, Holder M, Iliff M, Lepage D, Rasmussen P,
+  Redelings B, Sanchez-Reyes L, Miller E (2025). "A complete and
+  dynamic tree of birds." _Proceedings of the National Academy of
+  Sciences_.
+
+To see these entries in BibTeX format, use 'format(&lt;citation&gt;,
+bibtex=TRUE)', or 'toBibtex(.)'.
+
+The current version of the Aves tree is v1.5.
+        Please specify the tree and taxonomy version used when citing this R package.
+        When possible, cite all the original studies supporting your tree:
+        These citations are acessible using getCitations(your_tree)</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: tidyverse</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyverse' was built under R version 4.4.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.4.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'purrr' was built under R version 4.4.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'stringr' was built under R version 4.4.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'lubridate' was built under R version 4.4.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.2
+✔ ggplot2   4.0.2     ✔ tibble    3.3.1
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.1.0     </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+✖ dplyr::where()  masks ape::where()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(ape)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <p>Firstly we are going to select the phylogeny of wood-warblers to try the workflow. We can get the acces to eBird taxonomy files using <code>taxonomyGet()</code>, than we select the family of <strong>wood-warblers</strong> (<em>Parulidae</em>).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>taxonomy <span class="ot">&lt;-</span> <span class="fu">taxonomyGet</span>(<span class="at">taxonomy_year =</span> <span class="dv">2021</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>warblers <span class="ot">&lt;-</span> taxonomy <span class="sc">|&gt;</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FAMILY <span class="sc">==</span> <span class="st">"Parulidae (New World Warblers)"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(warblers)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  TAXON_ORDER SPECIES_CODE TAXON_CONCEPT_ID      PRIMARY_COM_NAME
+1       32843      ovenbi1 avibase-CEA5B6AA              Ovenbird
+2       32847      woewar1 avibase-295C4CD6   Worm-eating Warbler
+3       32849       louwat avibase-7AB0F3A4 Louisiana Waterthrush
+4       32850       norwat avibase-709AF716  Northern Waterthrush
+5       32852       bacwar avibase-207491AE     Bachman's Warbler
+6       32853       gowwar avibase-83F326C8 Golden-winged Warbler
+                 SCI_NAME        ORDER1                         FAMILY ott_id
+1     Seiurus aurocapilla Passeriformes Parulidae (New World Warblers) 285207
+2  Helmitheros vermivorum Passeriformes Parulidae (New World Warblers) 860003
+3      Parkesia motacilla Passeriformes Parulidae (New World Warblers) 660355
+4 Parkesia noveboracensis Passeriformes Parulidae (New World Warblers) 285210
+5     Vermivora bachmanii Passeriformes Parulidae (New World Warblers) 237566
+6   Vermivora chrysoptera Passeriformes Parulidae (New World Warblers)  85249
+                 ott_name
+1     Seiurus aurocapilla
+2  Helmitheros vermivorum
+3      Parkesia motacilla
+4 Parkesia noveboracensis
+5     Vermivora bachmanii
+6   Vermivora chrysoptera
+                                                      ott_tax_sources
+1 ncbi:182946,worms:422653,gbif:2489590,irmng:11346310,irmng:11704550
+2 ncbi:182932,worms:422651,gbif:2489603,irmng:11833136,irmng:10856823
+3 ncbi:231571,worms:567886,gbif:6093862,irmng:10452680,irmng:11797571
+4 ncbi:182947,worms:567887,gbif:6093856,irmng:10591067,irmng:11901185
+5                             ncbi:873202,gbif:5230816,irmng:10456589
+6                ncbi:231561,worms:422630,gbif:5230811,irmng:10192611
+   ott_match_type                H_M_name H_M_match_type
+1 canonical_match     Seiurus aurocapilla concepts_match
+2 canonical_match  Helmitheros vermivorum concepts_match
+3 canonical_match      Parkesia motacilla concepts_match
+4 canonical_match Parkesia noveboracensis concepts_match
+5 canonical_match     Vermivora bachmanii concepts_match
+6 canonical_match   Vermivora chrysoptera concepts_match
+            Birdlife_name Birdlife_match_type                IOC_name
+1     Seiurus aurocapilla      concepts_match     Seiurus aurocapilla
+2  Helmitheros vermivorum      concepts_match  Helmitheros vermivorum
+3      Parkesia motacilla      concepts_match      Parkesia motacilla
+4 Parkesia noveboracensis      concepts_match Parkesia noveboracensis
+5     Vermivora bachmanii      concepts_match     Vermivora bachmanii
+6   Vermivora chrysoptera      concepts_match   Vermivora chrysoptera
+  IOC_match_type             underscores
+1 concepts_match     Seiurus_aurocapilla
+2 concepts_match  Helmitheros_vermivorum
+3 concepts_match      Parkesia_motacilla
+4 concepts_match Parkesia_noveboracensis
+5 concepts_match     Vermivora_bachmanii
+6 concepts_match   Vermivora_chrysoptera</code></pre>
+</div>
+</div>
 <p>We need to select the species names vector for the tree extraction:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>warb_names_vec <span class="ot">&lt;-</span> warblers <span class="sc">|&gt;</span> </span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(SCI_NAME) <span class="sc">|&gt;</span> </span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(SCI_NAME)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(warb_names_vec)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>warb_names_vec <span class="ot">&lt;-</span> warblers <span class="sc">|&gt;</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(SCI_NAME) <span class="sc">|&gt;</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(SCI_NAME)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(warb_names_vec)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> chr [1:111] "Seiurus aurocapilla" "Helmitheros vermivorum" ...</code></pre>
 </div>
 </div>
 <p>We can extract the tree using <code>extractTree()</code> function from <code>clootl</code> package:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">extractTree</span>(<span class="at">species =</span> warb_names_vec, <span class="at">taxonomy_year =</span> <span class="dv">2021</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tree</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">extractTree</span>(<span class="at">species =</span> warb_names_vec, <span class="at">taxonomy_year =</span> <span class="dv">2021</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>tree</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Phylogenetic tree with 111 tips and 110 internal nodes.
@@ -421,7 +552,7 @@ Rooted; includes branch length(s).</code></pre>
 </div>
 <p>We can plot it using <code>ape</code> package.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tree, <span class="at">type =</span> <span class="st">"fan"</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">tip.color =</span> <span class="st">"darkblue"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tree, <span class="at">type =</span> <span class="st">"fan"</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">tip.color =</span> <span class="st">"darkblue"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -432,8 +563,8 @@ Rooted; includes branch length(s).</code></pre>
 </div>
 <p>Now it’s time to extract species pairs:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sister_pairs <span class="ot">&lt;-</span> <span class="fu">extract_sisters</span>(tree)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(sister_pairs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>sister_pairs <span class="ot">&lt;-</span> <span class="fu">extract_sisters</span>(tree)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(sister_pairs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 38
 Columns: 2
