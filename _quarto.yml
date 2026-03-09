@@ -4,7 +4,7 @@ project:
 
 website:
   title: "Master's Thesis"
-  description: "Spatial Analysis of BBS Bird Data"
+  description: "Analysis of BBS Bird Data"
   repo-url: "https://github.com/matejtvar/BBS-syntopy/issues/new?assignees=matejtvar"
   repo-actions: [issue]
   

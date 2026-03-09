@@ -1,8 +1,8 @@
 ---
 title: "Syntopy in North American Passerines"
-subtitle: "Spatial Analysis of BBS Data with R"
+subtitle: "Analysis of BBS Data with R"
 date: last-modified
-categories: [Syntopy, Spatial Data, Birds, R, BBS]
+categories: [Syntopy, Species Coexistence, Spatial Data, Birds, R, BBS Data]
 author: "Matěj Tvarůžka"
 format: html
 ---
