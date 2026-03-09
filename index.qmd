@@ -2,7 +2,7 @@
 title: "Syntopy Analysis with BBS"
 author: "Matěj Tvarůžka"
 format: html
-theme: cerulean
+theme: flatly
 number-sections: true
 ---
 
