@@ -79,5 +79,5 @@ Now it's time to extract species pairs:
 
 ```{r}
 sister_pairs <- extract_sisters(tree)
-head(sister_pairs)
+glimpse(sister_pairs)
 ```
