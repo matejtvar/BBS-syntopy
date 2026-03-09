@@ -20,7 +20,7 @@ website:
 
   page-footer:
     left: "© 2026 Matěj Tvarůžka"
-    right: "Built with Python & Quarto"
+    right: "Built with R Studio & Quarto"
 
 format:
   html:
