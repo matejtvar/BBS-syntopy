@@ -28,6 +28,7 @@ format:
       light: flatly
       dark: darkly
     toc: true
+    df-print: kable
     toc-location: right
     number-sections: true
     number-depth: 3
