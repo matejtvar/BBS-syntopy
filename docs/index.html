@@ -398,44 +398,192 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>taxonomy <span class="ot">&lt;-</span> <span class="fu">taxonomyGet</span>(<span class="at">taxonomy_year =</span> <span class="dv">2021</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>warblers <span class="ot">&lt;-</span> taxonomy <span class="sc">|&gt;</span> </span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FAMILY <span class="sc">==</span> <span class="st">"Parulidae (New World Warblers)"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(warblers)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Rows: 111
-Columns: 18
-$ TAXON_ORDER         &lt;int&gt; 32843, 32847, 32849, 32850, 32852, 32853, 32854, 3…
-$ SPECIES_CODE        &lt;chr&gt; "ovenbi1", "woewar1", "louwat", "norwat", "bacwar"…
-$ TAXON_CONCEPT_ID    &lt;chr&gt; "avibase-CEA5B6AA", "avibase-295C4CD6", "avibase-7…
-$ PRIMARY_COM_NAME    &lt;chr&gt; "Ovenbird", "Worm-eating Warbler", "Louisiana Wate…
-$ SCI_NAME            &lt;chr&gt; "Seiurus aurocapilla", "Helmitheros vermivorum", "…
-$ ORDER1              &lt;chr&gt; "Passeriformes", "Passeriformes", "Passeriformes",…
-$ FAMILY              &lt;chr&gt; "Parulidae (New World Warblers)", "Parulidae (New …
-$ ott_id              &lt;int&gt; 285207, 860003, 660355, 285210, 237566, 85249, 359…
-$ ott_name            &lt;chr&gt; "Seiurus aurocapilla", "Helmitheros vermivorum", "…
-$ ott_tax_sources     &lt;chr&gt; "ncbi:182946,worms:422653,gbif:2489590,irmng:11346…
-$ ott_match_type      &lt;chr&gt; "canonical_match", "canonical_match", "canonical_m…
-$ H_M_name            &lt;chr&gt; "Seiurus aurocapilla", "Helmitheros vermivorum", "…
-$ H_M_match_type      &lt;chr&gt; "concepts_match", "concepts_match", "concepts_matc…
-$ Birdlife_name       &lt;chr&gt; "Seiurus aurocapilla", "Helmitheros vermivorum", "…
-$ Birdlife_match_type &lt;chr&gt; "concepts_match", "concepts_match", "concepts_matc…
-$ IOC_name            &lt;chr&gt; "Seiurus aurocapilla", "Helmitheros vermivorum", "…
-$ IOC_match_type      &lt;chr&gt; "concepts_match", "concepts_match", "concepts_matc…
-$ underscores         &lt;chr&gt; "Seiurus_aurocapilla", "Helmitheros_vermivorum", "…</code></pre>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(warblers)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 6%">
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 1%">
+<col style="width: 6%">
+<col style="width: 17%">
+<col style="width: 4%">
+<col style="width: 6%">
+<col style="width: 3%">
+<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 6%">
+<col style="width: 3%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">TAXON_ORDER</th>
+<th style="text-align: left;">SPECIES_CODE</th>
+<th style="text-align: left;">TAXON_CONCEPT_ID</th>
+<th style="text-align: left;">PRIMARY_COM_NAME</th>
+<th style="text-align: left;">SCI_NAME</th>
+<th style="text-align: left;">ORDER1</th>
+<th style="text-align: left;">FAMILY</th>
+<th style="text-align: right;">ott_id</th>
+<th style="text-align: left;">ott_name</th>
+<th style="text-align: left;">ott_tax_sources</th>
+<th style="text-align: left;">ott_match_type</th>
+<th style="text-align: left;">H_M_name</th>
+<th style="text-align: left;">H_M_match_type</th>
+<th style="text-align: left;">Birdlife_name</th>
+<th style="text-align: left;">Birdlife_match_type</th>
+<th style="text-align: left;">IOC_name</th>
+<th style="text-align: left;">IOC_match_type</th>
+<th style="text-align: left;">underscores</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">32843</td>
+<td style="text-align: left;">ovenbi1</td>
+<td style="text-align: left;">avibase-CEA5B6AA</td>
+<td style="text-align: left;">Ovenbird</td>
+<td style="text-align: left;">Seiurus aurocapilla</td>
+<td style="text-align: left;">Passeriformes</td>
+<td style="text-align: left;">Parulidae (New World Warblers)</td>
+<td style="text-align: right;">285207</td>
+<td style="text-align: left;">Seiurus aurocapilla</td>
+<td style="text-align: left;">ncbi:182946,worms:422653,gbif:2489590,irmng:11346310,irmng:11704550</td>
+<td style="text-align: left;">canonical_match</td>
+<td style="text-align: left;">Seiurus aurocapilla</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Seiurus aurocapilla</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Seiurus aurocapilla</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Seiurus_aurocapilla</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">32847</td>
+<td style="text-align: left;">woewar1</td>
+<td style="text-align: left;">avibase-295C4CD6</td>
+<td style="text-align: left;">Worm-eating Warbler</td>
+<td style="text-align: left;">Helmitheros vermivorum</td>
+<td style="text-align: left;">Passeriformes</td>
+<td style="text-align: left;">Parulidae (New World Warblers)</td>
+<td style="text-align: right;">860003</td>
+<td style="text-align: left;">Helmitheros vermivorum</td>
+<td style="text-align: left;">ncbi:182932,worms:422651,gbif:2489603,irmng:11833136,irmng:10856823</td>
+<td style="text-align: left;">canonical_match</td>
+<td style="text-align: left;">Helmitheros vermivorum</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Helmitheros vermivorum</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Helmitheros vermivorum</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Helmitheros_vermivorum</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">32849</td>
+<td style="text-align: left;">louwat</td>
+<td style="text-align: left;">avibase-7AB0F3A4</td>
+<td style="text-align: left;">Louisiana Waterthrush</td>
+<td style="text-align: left;">Parkesia motacilla</td>
+<td style="text-align: left;">Passeriformes</td>
+<td style="text-align: left;">Parulidae (New World Warblers)</td>
+<td style="text-align: right;">660355</td>
+<td style="text-align: left;">Parkesia motacilla</td>
+<td style="text-align: left;">ncbi:231571,worms:567886,gbif:6093862,irmng:10452680,irmng:11797571</td>
+<td style="text-align: left;">canonical_match</td>
+<td style="text-align: left;">Parkesia motacilla</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Parkesia motacilla</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Parkesia motacilla</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Parkesia_motacilla</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">32850</td>
+<td style="text-align: left;">norwat</td>
+<td style="text-align: left;">avibase-709AF716</td>
+<td style="text-align: left;">Northern Waterthrush</td>
+<td style="text-align: left;">Parkesia noveboracensis</td>
+<td style="text-align: left;">Passeriformes</td>
+<td style="text-align: left;">Parulidae (New World Warblers)</td>
+<td style="text-align: right;">285210</td>
+<td style="text-align: left;">Parkesia noveboracensis</td>
+<td style="text-align: left;">ncbi:182947,worms:567887,gbif:6093856,irmng:10591067,irmng:11901185</td>
+<td style="text-align: left;">canonical_match</td>
+<td style="text-align: left;">Parkesia noveboracensis</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Parkesia noveboracensis</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Parkesia noveboracensis</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Parkesia_noveboracensis</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">32852</td>
+<td style="text-align: left;">bacwar</td>
+<td style="text-align: left;">avibase-207491AE</td>
+<td style="text-align: left;">Bachman’s Warbler</td>
+<td style="text-align: left;">Vermivora bachmanii</td>
+<td style="text-align: left;">Passeriformes</td>
+<td style="text-align: left;">Parulidae (New World Warblers)</td>
+<td style="text-align: right;">237566</td>
+<td style="text-align: left;">Vermivora bachmanii</td>
+<td style="text-align: left;">ncbi:873202,gbif:5230816,irmng:10456589</td>
+<td style="text-align: left;">canonical_match</td>
+<td style="text-align: left;">Vermivora bachmanii</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Vermivora bachmanii</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Vermivora bachmanii</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Vermivora_bachmanii</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">32853</td>
+<td style="text-align: left;">gowwar</td>
+<td style="text-align: left;">avibase-83F326C8</td>
+<td style="text-align: left;">Golden-winged Warbler</td>
+<td style="text-align: left;">Vermivora chrysoptera</td>
+<td style="text-align: left;">Passeriformes</td>
+<td style="text-align: left;">Parulidae (New World Warblers)</td>
+<td style="text-align: right;">85249</td>
+<td style="text-align: left;">Vermivora chrysoptera</td>
+<td style="text-align: left;">ncbi:231561,worms:422630,gbif:5230811,irmng:10192611</td>
+<td style="text-align: left;">canonical_match</td>
+<td style="text-align: left;">Vermivora chrysoptera</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Vermivora chrysoptera</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Vermivora chrysoptera</td>
+<td style="text-align: left;">concepts_match</td>
+<td style="text-align: left;">Vermivora_chrysoptera</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 <p>We need to select the species names vector for the tree extraction:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>warb_names_vec <span class="ot">&lt;-</span> warblers <span class="sc">|&gt;</span> </span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(SCI_NAME) <span class="sc">|&gt;</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(SCI_NAME)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(warb_names_vec)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>warb_names_vec <span class="ot">&lt;-</span> warblers <span class="sc">|&gt;</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(SCI_NAME) <span class="sc">|&gt;</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(SCI_NAME)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(warb_names_vec)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> chr [1:111] "Seiurus aurocapilla" "Helmitheros vermivorum" ...</code></pre>
 </div>
 </div>
 <p>We can extract the tree using <code>extractTree()</code> function from <code>clootl</code> package:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">extractTree</span>(<span class="at">species =</span> warb_names_vec, <span class="at">taxonomy_year =</span> <span class="dv">2021</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tree</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">extractTree</span>(<span class="at">species =</span> warb_names_vec, <span class="at">taxonomy_year =</span> <span class="dv">2021</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>tree</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Phylogenetic tree with 111 tips and 110 internal nodes.
@@ -450,7 +598,7 @@ Rooted; includes branch length(s).</code></pre>
 </div>
 <p>We can plot it using <code>ape</code> package.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tree, <span class="at">type =</span> <span class="st">"fan"</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">tip.color =</span> <span class="st">"darkblue"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tree, <span class="at">type =</span> <span class="st">"fan"</span>, <span class="at">cex =</span> <span class="fl">1.5</span>, <span class="at">tip.color =</span> <span class="st">"darkblue"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -461,8 +609,8 @@ Rooted; includes branch length(s).</code></pre>
 </div>
 <p>Now it’s time to extract species pairs using function <code>extract_sisters()</code> from <code>diverge</code> package:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sister_pairs <span class="ot">&lt;-</span> <span class="fu">extract_sisters</span>(tree)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(sister_pairs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sister_pairs <span class="ot">&lt;-</span> <span class="fu">extract_sisters</span>(tree)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(sister_pairs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 38
 Columns: 2

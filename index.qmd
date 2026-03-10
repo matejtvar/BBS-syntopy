@@ -45,7 +45,7 @@ Firstly we are going to select the phylogeny of wood-warblers to try the workflo
 taxonomy <- taxonomyGet(taxonomy_year = 2021)
 warblers <- taxonomy |> 
   filter(FAMILY == "Parulidae (New World Warblers)")
-head(warblers)
+head(warblers, 3)
 ```
 
 We need to select the species names vector for the tree extraction:
