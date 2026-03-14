@@ -6,6 +6,8 @@
 ##### ze starsich souboru (hl. "cooccurrence_Au.R")                       #####*
 ###############################################################################*
 
+rtoqmd_addin()
+
 setwd("/Users/Lada/Documents/clanky_a_projekty/GACR_sympatry/PROJEKT_cooccurrenceAu")
 setwd("/Users/vladimirremes/Documents/clanky_a_projekty/GACR_sympatry/PROJEKT_cooccurrenceAu")
 require(tidyverse)

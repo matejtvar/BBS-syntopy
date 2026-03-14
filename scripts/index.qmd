@@ -38,7 +38,7 @@ require(tidyverse)
 require(ape)
 ```
 
-Firstly we are going to select the phylogeny of wood-warblers to try the workflow. We can get the acces to eBird taxonomy files using `taxonomyGet()`, than we select the family of **wood-warblers** (*Parulidae*).
+We can get the acces to eBird taxonomy files using `taxonomyGet()`, than we select the family of **wood-warblers** (*Parulidae*).
 
 ```{r}
 #| label: Taxonomy
@@ -82,3 +82,7 @@ Now it's time to extract species pairs using function `extract_sisters()` from `
 sister_pairs <- extract_sisters(tree)
 glimpse(sister_pairs)
 ```
+
+## eBird Status and Trends maps
+
+<https://ebird.github.io/ebirdst/>
