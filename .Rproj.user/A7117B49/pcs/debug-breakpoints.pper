@@ -15,21 +15,6 @@
                 "type": 1,
                 "is_package_breakpoint": false,
                 "package_name": ""
-            },
-            {
-                "id": 3,
-                "path": "C:/dev/projects/BBS-syntopy/scripts/cooccurrence_data_prep.R",
-                "line_number": 93,
-                "function_steps": "",
-                "function_name": "toplevel",
-                "state": 1,
-                "editor_state": 1,
-                "editor_line_number": 93,
-                "is_pending_debug_completion": false,
-                "needs_updated_steps": true,
-                "type": 1,
-                "is_package_breakpoint": false,
-                "package_name": ""
             }
         ]
     }
