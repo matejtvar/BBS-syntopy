@@ -2,6 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
+.bbs_dataset
+.data-in
+.workspace
+/.range_data
 
 /.quarto/
 **/*.quarto_ipynb
+.positai
