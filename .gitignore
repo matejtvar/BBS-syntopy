@@ -1,3 +1,4 @@
+# --- Existing R & Quarto Defaults ---
 .Rproj.user
 .Rhistory
 .RData
@@ -10,3 +11,11 @@
 /.quarto/
 **/*.quarto_ipynb
 .positai
+
+# --- New Project Specific Ignores ---
+# Ignore the specific R project file
+BBS-syntopy.Rproj
+
+# Ignore the data and workspace folders
+datasets/
+workspace/

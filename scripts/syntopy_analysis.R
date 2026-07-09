@@ -28,16 +28,16 @@ require(terra)
 require(sf)
 require(ggspatial)
 
-
 # Download BBS data
 # bbs <- grab_bbs_data()  Using bbsAssistent package
 # bbs <- fetch_bbs_data() Using bbsBayes
 
-# Step 1: Select species pairs -----------------------------------
+# Step 1: Select Species Pairs -----------------------------------
 # load BBS dataset
 # extract vectore of species names
 # select main groups for the phylogeny
 # extract the tree for selected groups
+# extract sister species pairs
 
 ## Version A: selecting only several families based on some criteria(?)
 names <- bbs$species_list |> 
@@ -151,44 +151,8 @@ names(ranges) <- extract_codes
 head(ranges, 1)
 head(all_sisters)
 
-calculate_overlap <- function(code1, code2, range_list, target_crs = 5070) {
-  # Calculation of sympatry
-  # --- SAFETY CHECK 1: Are the codes valid? ---
-  if (is.na(code1) | is.na(code2)) return(NA)
-  
-  # --- SAFETY CHECK 2: Do these codes exist in the range list? ---
-  if (is.null(range_list[[code1]]) | is.null(range_list[[code2]])) {
-    message("Warning: Range data missing for ", code1, " or ", code2)
-    return(NA)
-  }
-  # Transform to Equal Area CRS 5070 (Albers Equal Area)
-  s1 <- st_transform(range_list[[code1]], target_crs)
-  s2 <- st_transform(range_list[[code2]], target_crs)
-  
-  # Seasonal filtering
-  s1_b <- s1[s1$season %in% c("breeding", "resident"), ]
-  s2_b <- s2[s2$season %in% c("breeding", "resident"), ]
-  
-  if (nrow(s1_b) == 0 | nrow(s2_b) == 0) {
-    return(0)
-  }
-  
-  # Total range area calculation
-  area1 <- sum(as.numeric(st_area(s1_b)))
-  area2 <- sum(as.numeric(st_area(s2_b)))
-  
-  # Apply st_make_valid before intersecting
-  inter_geom <- st_intersection(st_make_valid(s1_b), st_make_valid(s2_b))
-  if (nrow(inter_geom) == 0) {
-    return(0)
-  } else {
-    area_inter <- sum(as.numeric(st_area(inter_geom)))
-    
-    # Sympatry Index Formula
-    index <- (area_inter/min(area1, area2)*100)
-    return(index)
-  }
-}
+# 2. Calculate Range Overlap ----------------------------------------------
+
 # Pairs dataframe
 pairs_data <- all_sisters |> 
   left_join(ebird_lookup, by = c("sp1" = "scientific_name")) |>
@@ -197,7 +161,7 @@ pairs_data <- all_sisters |>
   rename(code2 = species_code)
 head(pairs_data)
 
-# Run the calculation across all pairs
+# Run sympatry calculation across all pairs
 pairs_data$range_overlap <- sapply(1:nrow(pairs_data), function(i) {
   calculate_overlap(
     pairs_data$code1[i],
@@ -220,3 +184,88 @@ ggplot(sympatric_pairs, aes(x = range_overlap)) +
     x = "Symmetric Overlap Index (0 = Allopatric, 1 = Completely Overlapping)",
     y = "Number of Pairs"
   )
+
+# Run symmetry calculation across all pairs
+pairs_data$range_symmetry <- sapply(1:nrow(pairs_data), function(i) {
+  calculate_symmetry(
+    pairs_data$code1[i],
+    pairs_data$code2[i],
+    ranges
+  )
+})
+
+# 3. Inspecting N of BBS routes in sympatric zone -------------------------
+
+# Convert BBS routes to a spatial object (sf)
+bbs_routes_sf <- st_as_sf(bbs$routes,
+                          coords = c("Longitude", "Latitude"),
+                          crs = 4326
+)
+
+# Filter data for 2018
+observations <- bbs$observations |>
+  filter(Year == 2018)
+
+count_routes_sympatry <- function(code1, code2, range_list, routes_sf) {
+  # Function to count number of routes in sympatric range
+  
+  # Get breeding ranges
+  r1 <- range_list[[code1]][range_list[[code1]]$season %in% c("breeding", "resident"), ]
+  r2 <- range_list[[code2]][range_list[[code2]]$season %in% c("breeding", "resident"), ]
+  
+  if (nrow(r1) == 0 | nrow(r2) == 0) {
+    return(0)
+  }
+  
+  # Find the intersection polygon
+  overlap_poly <- st_intersection(st_make_valid(r1), st_make_valid(r2))
+  
+  if (nrow(overlap_poly) == 0) {
+    return(0)
+  }
+  
+  # Count routes that fall inside this polygon
+  routes_inside <- st_intersects(routes_sf, overlap_poly, sparse = FALSE)
+  return(sum(routes_inside))
+}
+
+# lookup for AOU codes using sister_pairs names
+aou_lookup <- bbs$species_list |>
+  select(AOU, Scientific_Name)
+
+# Add AOU codes to sister_pairs
+pairs_data <- pairs_data |>
+  left_join(aou_lookup, by = c("sp1" = "Scientific_Name")) |>
+  rename(aou1 = AOU) |>
+  left_join(aou_lookup, by = c("sp2" = "Scientific_Name")) |>
+  rename(aou2 = AOU)
+names(pairs_data)
+
+count_shared_routes <- function(a1, a2, obs_df) {
+  # Function to count shared BBS routes
+  
+  # Find routes where Sp1 was seen
+  r_sp1 <- obs_df$RouteDataID[obs_df$AOU == a1]
+  # Find routes where Sp2 was seen
+  r_sp2 <- obs_df$RouteDataID[obs_df$AOU == a2]
+  
+  # Intersection of Route IDs
+  shared_routes <- intersect(r_sp1, r_sp2)
+  return(length(unique(shared_routes)))
+}
+
+data <- pairs_data |>
+  filter(range_overlap >= 5) |>
+  mutate(
+    sympatry_routes = map2_dbl(code1, code2, ~ count_routes_sympatry(.x, .y, ranges, bbs_routes_sf)),
+    bbs_shared_routes = map2_dbl(aou1, aou2, ~ count_shared_routes(.x, .y, observations))
+  )
+summary(data)
+nrow(data)
+View(data)
+hist(data$bbs_shared_routes)
+
+# Save the object
+saveRDS(data, "syntopy_data_2018.rds")
+write_csv(data, "syntopy_data_2018.csv")
+# data <- readRDS("sister_pairs_data.rds")
