@@ -161,6 +161,7 @@ pairs_data <- all_sisters |>
   rename(code2 = species_code)
 head(pairs_data)
 
+source("scripts/calculate_sympatry_function.R")
 # Run sympatry calculation across all pairs
 pairs_data$range_overlap <- sapply(1:nrow(pairs_data), function(i) {
   calculate_overlap(
@@ -185,6 +186,7 @@ ggplot(sympatric_pairs, aes(x = range_overlap)) +
     y = "Number of Pairs"
   )
 
+source("scripts/calculate_symmetry_function.R")
 # Run symmetry calculation across all pairs
 pairs_data$range_symmetry <- sapply(1:nrow(pairs_data), function(i) {
   calculate_symmetry(
