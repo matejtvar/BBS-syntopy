@@ -1,4 +1,4 @@
-calculate_symmetry <- function(code1, code2, range_list, target_crs = 5070) {
+function(code1, code2, range_list, target_crs = 5070) {
   # Calculation of range symmetry
   # --- SAFETY CHECK 1: Are the codes valid? ---
   if (is.na(code1) | is.na(code2)) return(NA)

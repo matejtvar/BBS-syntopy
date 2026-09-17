@@ -1,9 +1,13 @@
 # ---- BBS Syntopy Analysis ----
 # Author: Matěj Tvarůžka
-# Description: Data analysis of BBS dataset for my master's thesis
+# Description: Data analysis of syntopy predictors with BBS dataset
+
+library(here)
+here::i_am("scripts/syntopy_analysis.R")
+here() # project path
 
 # Check for missing packages and install them
-cran_pkgs <- c("tidyverse", "clootl", "ape", "diverge", "terra", "sf")
+cran_pkgs <- c("here", "tidyverse", "clootl", "ape", "diverge", "terra", "sf")
 is_installed <- cran_pkgs %in% rownames(installed.packages())
 if(any(is_installed == FALSE)){
   install.packages(cran_pkgs[!is_installed])
@@ -13,68 +17,57 @@ if (!requireNamespace("remotes", quietly = TRUE)) {
   install.packages("remotes")
 }
 # To install from GitHub:
-#remotes::install_github("bbsBayes/bbsBayes")
 #remotes::install_github("ebird/ebirdst")
 #remotes::install_github("trashbirdecology/bbsAssistant")
 
 # Libraries
-require(clootl)
-require(tidyverse)
-require(bbsAssistant)
-require(ape)
-require(ebirdst)
-require(diverge)
-require(terra)
-require(sf)
-require(ggspatial)
+library(clootl)
+library(tidyverse)
+library(bbsAssistant)
+library(ape)
+library(ebirdst)
+library(diverge)
+library(terra)
+library(sf)
 
+# ---- Preparing BBS data ----
 # Download BBS data
 # bbs <- grab_bbs_data()  Using bbsAssistent package
-# bbs <- fetch_bbs_data() Using bbsBayes
+# load BBS dataset
+# Merge BBS dataframes and clean the data
+
+# Select methodologicaly suitable routes for chosen years
+weather <- bbs$weather |>
+  dplyr::filter(RunType == 1) |> 
+  dplyr::filter(Year == 2017 | Year == 2018 | Year == 2019) |> 
+  dplyr::select(RTENO, Year)
+
+# Extract routes geometries and convert them to a spatial object
+routes <- bbs$routes |>
+  dplyr::select(RTENO, Latitude, Longitude)
+
+routes_sf <- sf::st_as_sf(routes, coords = c("Longitude", "Latitude"), crs = 4326)
+
+dat <- routes_sf |> 
+  dplyr::inner_join(weather, by = "RTENO") |> 
+  dplyr::select(RTENO, geometry)
+
+observations <- bbs$observations |> 
+  dplyr::filter(Year == 2017 | Year == 2018 | Year == 2019) |> 
+  dplyr::left_join(bbs$species_list |> select(Scientific_Name, AOU), by = "AOU") |>
+  dplyr::relocate(RTENO, Scientific_Name) |> 
+  dplyr::select(-RouteDataID, -CountryNum, -StateNum, -Route, -RPID, -AOU)
+
+dat <- observations |> 
+  dplyr::right_join(dat, by = "RTENO")
 
 # Step 1: Select Species Pairs -----------------------------------
-# load BBS dataset
-# extract vectore of species names
+# extract vector of species names
 # select main groups for the phylogeny
 # extract the tree for selected groups
 # extract sister species pairs
 
-## Version A: selecting only several families based on some criteria(?)
-names <- bbs$species_list |> 
-  filter(ORDER == "Passeriformes") |> 
-  group_by(Family) %>% 
-  summarise(nrow(Species), n_species=n()) |> 
-  arrange(desc(n_species)) |> 
-  filter(n_species > 10)
-families <- names$Family
-which(names$n_species > 20)
-sum(names[1:nrow(names),2])
-# If I will select 12 most species rich passerine families in BBS
-# I will end up with 297 species
-
-# BBS names vector
-bbs_names_vec <- bbs$species_list |>
-  filter(Family %in% families) |> 
-  pull(Scientific_Name)
-
-# Intersection of BBS and eBirdst names vectors
-names_vec <- ebirdst_runs |> 
-  filter(scientific_name %in% bbs_names_vec) |> 
-  pull(scientific_name)
-
-# Passerine taxonomy names vector
-taxonomy <- taxonomyGet(taxonomy_year = 2024)
-tax_passerines <- taxonomy[taxonomy$ORDER1 == "Passeriformes",]
-length(tax_passerines$SCI_NAME)
-tax_names_vec <- tax_passerines$SCI_NAME
-
-# Get the trees
-extractTree(species = ebirst_names_vec, taxonomy_year = 2023)
-treeA <- extractTree(species = names_vec, taxonomy_year = 2025, version = "1.6", force = TRUE)
-plot(treeA, type = "fan", cex = 0.3, tip.color = "darkblue")
-extract_sisters(treeA)
-
-## Version B: Selecting all possible species
+# Selecting all possible species
 all_names <- bbs$species_list |> 
   filter(ORDER == "Passeriformes") |>
   pull(Scientific_Name, AOU)
@@ -163,6 +156,9 @@ head(pairs_data)
 
 source("scripts/calculate_sympatry_function.R")
 # Run sympatry calculation across all pairs
+
+
+#### USE purr package!!!!
 pairs_data$range_overlap <- sapply(1:nrow(pairs_data), function(i) {
   calculate_overlap(
     pairs_data$code1[i],
@@ -181,7 +177,7 @@ ggplot(sympatric_pairs, aes(x = range_overlap)) +
   geom_histogram(fill = "steelblue", color = "white", boundary = 0) +
   theme_minimal() +
   labs(
-    title = "Distribution of Range Overlap in 56 Passerine Sister Pairs",
+    title = "Distribution of Range Overlap in 57 Passerine Sister Pairs",
     x = "Symmetric Overlap Index (0 = Allopatric, 1 = Completely Overlapping)",
     y = "Number of Pairs"
   )
@@ -198,11 +194,10 @@ pairs_data$range_symmetry <- sapply(1:nrow(pairs_data), function(i) {
 
 # 3. Inspecting N of BBS routes in sympatric zone -------------------------
 
-# Convert BBS routes to a spatial object (sf)
-bbs_routes_sf <- st_as_sf(bbs$routes,
-                          coords = c("Longitude", "Latitude"),
-                          crs = 4326
-)
+# purr package and use of map() function ----------------------------------
+
+
+
 
 # Filter data for 2018
 observations <- bbs$observations |>
@@ -267,7 +262,18 @@ nrow(data)
 View(data)
 hist(data$bbs_shared_routes)
 
-# Save the object
-saveRDS(data, "syntopy_data_2018.rds")
-write_csv(data, "syntopy_data_2018.csv")
-# data <- readRDS("sister_pairs_data.rds")
+
+write_csv(data, "data_results/syntopy_data_2018.csv")
+
+# 4. Select routes within sympatric range ---------------------------------
+routes_lookup <- bbs_routes_sf |> 
+  select(RTENO, )
+
+a <- bbs$weather |> 
+  filter(Year == 2018) |> 
+  filter(RunType == 1)
+
+
+# 5. Co-occurrence table for routes ------------------------------------------
+k <- count_shared_routes(aou1, aou2, )
+N <- sum(unique(observations[observations$Route,]))
