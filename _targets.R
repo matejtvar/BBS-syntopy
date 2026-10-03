@@ -8,8 +8,9 @@ library(targets)
 # library(tarchetypes) # Load other packages as needed.
 
 # Set target options:
+# Set target options:
 tar_option_set(
-  packages = c("dplyr", "ebirdst", "diverge", "clootl", "sf", "bbsAssistant") # Packages that your targets need for their tasks.
+  packages = c("dplyr", "ebirdst", "diverge", "clootl", "sf", "bbsAssistant", "purrr") # Packages that your targets need for their tasks.
   # format = "qs", # Optionally set the default storage format. qs is fast.
   #
   # Pipelines that take a long time to run may benefit from
@@ -43,14 +44,21 @@ tar_option_set(
   #
   # Set other options as needed.
 )
-
 # Run the R scripts in the R/ folder with your custom functions:
-tar_source("R")
-# tar_source("other_functions.R") # Source other scripts as needed.
+tar_source("R/1.data_import.R")
+tar_source("functions/calculate_symmetry.R") # Source other scripts as needed.
+tar_source("functions/calculate_syntopy.R") # Source other scripts as needed.
+
 
 # Replace the target list below with your own:
 list(
-  tar_target(file, "data.csv", format = "file"),
-  tar_target(data, get_data(file)),
-  tar_target(model, fit_model(data))
+  tar_target(
+    name = data,
+    command = tibble(x = rnorm(100), y = rnorm(100))
+    # format = "qs" # Efficient storage for general data objects.
+  ),
+  tar_target(
+    name = model,
+    command = coefficients(lm(y ~ x, data = data))
+  )
 )
