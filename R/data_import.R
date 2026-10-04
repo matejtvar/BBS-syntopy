@@ -21,7 +21,6 @@ library(diverge)
 library(sf)
 library(purrr)
 
-
 # 1. Preparing BBS data ---------------------------------------------------
 
 # Download BBS data
