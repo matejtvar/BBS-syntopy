@@ -1,64 +1,39 @@
-# Created by use_targets().
-# Follow the comments below to fill in this target script.
-# Then follow the manual to check and run the pipeline:
-#   https://books.ropensci.org/targets/walkthrough.html#inspect-the-pipeline
-
-# Load packages required to define the pipeline:
 library(targets)
-# library(tarchetypes) # Load other packages as needed.
 
-# Set target options:
-# Set target options:
+# 1. Global pipeline settings
 tar_option_set(
-  packages = c("dplyr", "ebirdst", "diverge", "clootl", "sf", "bbsAssistant", "purrr") # Packages that your targets need for their tasks.
-  # format = "qs", # Optionally set the default storage format. qs is fast.
-  #
-  # Pipelines that take a long time to run may benefit from
-  # optional distributed computing. To use this capability
-  # in tar_make(), supply a {crew} controller
-  # as discussed at https://books.ropensci.org/targets/crew.html.
-  # Choose a controller that suits your needs. For example, the following
-  # sets a controller that scales up to a maximum of two workers
-  # which run as local R processes. Each worker launches when there is work
-  # to do and exits if 60 seconds pass with no tasks to run.
-  #
-  #   controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
-  #
-  # Alternatively, if you want workers to run on a high-performance computing
-  # cluster, select a controller from the {crew.cluster} package.
-  # For the cloud, see plugin packages like {crew.aws.batch}.
-  # The following example is a controller for Sun Grid Engine (SGE).
-  #
-  #   controller = crew.cluster::crew_controller_sge(
-  #     # Number of workers that the pipeline can scale up to:
-  #     workers = 10,
-  #     # It is recommended to set an idle time so workers can shut themselves
-  #     # down if they are not running tasks.
-  #     seconds_idle = 120,
-  #     # Many clusters install R as an environment module, and you can load it
-  #     # with the script_lines argument. To select a specific verison of R,
-  #     # you may need to include a version string, e.g. "module load R/4.3.2".
-  #     # Check with your system administrator if you are unsure.
-  #     script_lines = "module load R"
-  #   )
-  #
-  # Set other options as needed.
+  packages = c("dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr"),
+  format = "rds"
 )
-# Run the R scripts in the R/ folder with your custom functions:
-tar_source("R/1.data_import.R")
-tar_source("functions/calculate_symmetry.R") # Source other scripts as needed.
-tar_source("functions/calculate_syntopy.R") # Source other scripts as needed.
+
+# 2. Source main workflow scripts AND subfolder functions
+# Option A: If functions/ is inside R/ (e.g. R/functions/)
+tar_source("R")
+
+# Option B: If functions/ is at the root project directory level
+# tar_source(c("R", "functions"))
 
 
-# Replace the target list below with your own:
+# 3. Define the Targets pipeline
 list(
+  # Track raw files
+  tar_target(bbs_file, "data/bbs_data/bbs_dataset.RData", format = "file"),
+  tar_target(tree_path, "data/AvesDataLite-main", format = "file"),
+
+  # 1. Data Import
+  tar_target(bbs_data, load_bbs_data(bbs_file)),
+  tar_target(sister_names, get_sister_names(bbs_data, tree_path)),
+  tar_target(ranges, load_species_ranges(sister_names)),
+
+  # 2. Syntopy Predictors (uses calculate_symmetry() and calculate_sympatry())
   tar_target(
-    name = data,
-    command = tibble(x = rnorm(100), y = rnorm(100))
-    # format = "qs" # Efficient storage for general data objects.
+    syntopy_data,
+    compute_syntopy_predictors(ranges, bbs_data) # Function defined in syntopy_predictors.R
   ),
-  tar_target(
-    name = model,
-    command = coefficients(lm(y ~ x, data = data))
-  )
+
+  # 3. Modelling
+  tar_target(models, run_models(syntopy_data)), # Defined in modelling.R
+
+  # 4. Final Analysis
+  tar_target(final_outputs, run_final_analysis(models)) # Defined in final_analysis.R
 )
