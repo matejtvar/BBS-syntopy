@@ -2,7 +2,7 @@ library(targets)
 
 # 1. Global pipeline settings
 tar_option_set(
-  packages = c("dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr"),
+  packages = c("dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr", "ggplot", "tidyr"),
   format = "rds"
 )
 

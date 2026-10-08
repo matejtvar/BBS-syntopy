@@ -150,10 +150,10 @@ if (length(failed) > 0) {
 }
 
 # Save objects needed for downstream scripts
-save(
-  dat,
-  sister_pairs,
-  sister_names,
-  ranges,
-  file = here::here("data/imported_bbs_data.RData")
-)
+# save(
+#   dat,
+#   sister_pairs,
+#   sister_names,
+#   ranges,
+#   file = here::here("data/imported_bbs_data.RData")
+# )
