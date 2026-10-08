@@ -15,6 +15,7 @@ library(assertthat)
 library(testthat)
 library(usethis)
 library(tidyr)
+library(ggplot2)
 
 # 1. Calculate degree of sympatry for each pair -------------------------------------
 
@@ -31,7 +32,6 @@ ranges[["Passerina ciris"]]
 all(names(ranges) == sapply(ranges, function(x) x$scientific_name[1]))
 
 # Calculate sympatry for every pair in sister_pairs
-# using breeding and resident ranges
 
 sister_pairs <- sister_pairs |>
   dplyr::mutate(
@@ -110,7 +110,7 @@ annual_summary <- pairs_by_year |>
 
 # Find routes where both sp1 and sp2 were observed in the same year
 route_syntopy_by_year <- sympatric_pairs |>
-  dplyr::inner_join(bbs_occurrences, by = c("sp1" = "Scientific_Name"), relationship = "many-to-many") |>
+  dplyr::inner_join(bbs_occurrences, by = c("sp1" = "Scientific_Name"),relationship = "many-to-many") |>
   dplyr::inner_join(bbs_occurrences, by = c("sp2" = "Scientific_Name", "RTENO" = "RTENO", "Year" = "Year")) |>
   dplyr::group_by(Year, sp1, sp2) |>
   dplyr::summarise(n_shared_routes = dplyr::n(), .groups = "drop")
@@ -119,4 +119,34 @@ route_syntopy_by_year <- sympatric_pairs |>
 route_syntopy_summary <- route_syntopy_by_year |>
   dplyr::group_by(Year) |>
   dplyr::summarise(pairs_sharing_routes = dplyr::n_distinct(sp1, sp2))
+# There are around 50 sister pairs sharing at least one route for each year
+# We need to select all 59 sympatric pairs (despite their absence of shared routes),
+# because we are interested in the degree of syntopy in the sympatric zone
 
+# 3. Range symmetry and other range metrics -------------------------------
+
+# Calculate range symmetry
+
+sister_pairs <- sister_pairs |>
+  dplyr::mutate(
+    symmetry = map2_dbl(sp1, sp2, \(sp1, sp2) {
+      calculate_symmetry(
+        sp1 = sp1, sp2 = sp2,
+        range_list = ranges, season_filter = c("breeding", "resident"))
+    })
+  )
+
+# Calculate centroid distance of the ranges for every pair in sister_pairs
+
+sister_pairs <- sister_pairs |>
+  mutate(
+    centroid_dist_km = map2_dbl(sp1, sp2, \(s1, s2) {
+      calculate_centroid_distance(
+        sp1 = s1,
+        sp2 = s2,
+        range_list = ranges,
+        season_filter = c("breeding", "resident"),
+        unit = "km"
+      )
+    })
+  )
