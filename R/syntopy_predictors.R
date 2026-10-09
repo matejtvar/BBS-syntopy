@@ -17,10 +17,9 @@ library(usethis)
 library(tidyr)
 library(ggplot2)
 
-# 1. Calculate degree of sympatry for each pair -------------------------------------
+here::here(load("data/data_import.RData"))
 
-# create empty vector
-sister_pairs$sympatry <- vector(mode = "numeric", length = nrow(sister_pairs))
+# 1. Calculate degree of sympatry for each pair -------------------------------------
 
 # Assign species scientific names as list element names
 names(ranges) <- sister_names
@@ -30,6 +29,9 @@ ranges[["Passerina ciris"]]
 
 # Check if all element names match their internal scientific_name
 all(names(ranges) == sapply(ranges, function(x) x$scientific_name[1]))
+
+# Source function
+source(here::here("R/functions/calculate_sympatry.R"))
 
 # Calculate sympatry for every pair in sister_pairs
 
@@ -125,9 +127,12 @@ route_syntopy_summary <- route_syntopy_by_year |>
 
 # 3. Range symmetry and other range metrics -------------------------------
 
+# Source function
+source(here::here("R/functions/calculate_symmetry.R"))
+
 # Calculate range symmetry
 
-sister_pairs <- sister_pairs |>
+sympatric_pairs <- sympatric_pairs |>
   dplyr::mutate(
     symmetry = map2_dbl(sp1, sp2, \(sp1, sp2) {
       calculate_symmetry(
@@ -136,9 +141,12 @@ sister_pairs <- sister_pairs |>
     })
   )
 
+# Source function
+source(here::here("R/functions/calculate_cen_dist.R"))
+
 # Calculate centroid distance of the ranges for every pair in sister_pairs
 
-sister_pairs <- sister_pairs |>
+sympatric_pairs <- sympatric_pairs |>
   mutate(
     centroid_dist_km = map2_dbl(sp1, sp2, \(s1, s2) {
       calculate_centroid_distance(
@@ -150,3 +158,23 @@ sister_pairs <- sister_pairs |>
       )
     })
   )
+
+# Visual exploration of predictors
+par(mfrow = c(2,2))
+hist(sympatric_pairs$sympatry, breaks = 12, main="Degree of Sympatry", xlab="Range overlap (%)", col="darkseagreen3")
+hist(sympatric_pairs$symmetry, breaks = 12, main="Degree of Range Symmetry", xlab="Range symmetry (%)", col="darkseagreen4")
+hist(sympatric_pairs$age_myr, breaks = 12, main="Evolutionary age", xlab="Evolutionary age (myr)", col="steelblue")
+hist(sympatric_pairs$centroid_dist_km, breaks = 12, main="Distance Between Species Range Centroids", xlab="Geographical Distance (Km)", col="brown")
+
+# 4. Syntopy on route scale ----------------------------------------------
+
+
+
+# Save objects needed for downstream scripts
+# save(
+#   dat,
+#   sympatric_pairs,
+#   sister_names,
+#   ranges,
+#   file = here::here("data/syntopy_pred_dat.RData")
+# )
