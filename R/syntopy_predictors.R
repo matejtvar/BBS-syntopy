@@ -16,6 +16,7 @@ library(testthat)
 library(usethis)
 library(tidyr)
 library(ggplot2)
+library(targets)
 
 here::here(load("data/data_import.RData"))
 
@@ -162,19 +163,16 @@ sympatric_pairs <- sympatric_pairs |>
 # Visual exploration of predictors
 par(mfrow = c(2,2))
 hist(sympatric_pairs$sympatry, breaks = 12, main="Degree of Sympatry", xlab="Range overlap (%)", col="darkseagreen3")
-hist(sympatric_pairs$symmetry, breaks = 12, main="Degree of Range Symmetry", xlab="Range symmetry (%)", col="darkseagreen4")
+hist(sympatric_pairs$symmetry, breaks = 12, main="Degree of Range Symmetry", xlab="Range symmetry (from 0 to 0.5)", col="darkseagreen4")
 hist(sympatric_pairs$age_myr, breaks = 12, main="Evolutionary age", xlab="Evolutionary age (myr)", col="steelblue")
-hist(sympatric_pairs$centroid_dist_km, breaks = 12, main="Distance Between Species Range Centroids", xlab="Geographical Distance (Km)", col="brown")
+hist(sympatric_pairs$centroid_dist_km, breaks = 12, main="Distance Between Species Range Centroids", xlab="Geographical Distance (Km)", col="steelblue2")
+
+par(mfrow = c(1,1))
 
 # 4. Syntopy on route scale ----------------------------------------------
 
+# Load targets data
+targets::tar_load(syntopy_predictors_step)
+targets::tar_load(data_import_step)
 
 
-# Save objects needed for downstream scripts
-# save(
-#   dat,
-#   sympatric_pairs,
-#   sister_names,
-#   ranges,
-#   file = here::here("data/syntopy_pred_dat.RData")
-# )
