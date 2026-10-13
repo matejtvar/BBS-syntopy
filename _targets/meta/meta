@@ -1,0 +1,6 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+bbs_file|stem|118538afae6f70e6|5799fe520f27a563|2c530c1562a7fbd1|-457329800|data/bbs_data/bbs_dataset.RData|t20730.44403508s|s54609681b|54609681|file|local|vector|||0.001||
+script_predictors|stem|ed6195d54126946a|a0381bcbe0d173e1|2c530c1562a7fbd1|1870673548|R/syntopy_predictors.R|t20739.8157962052s|s6644b|6644|file|local|vector|||1.284||
+script_import|stem|1e67787fbd0085a8|64864e403e27facc|2c530c1562a7fbd1|-164169437|R/data_import.R|t20739.815641495s|s5435b|5435|file|local|vector|||0||
+data_import_step|stem|2a8eb7f5914d045f|d2fbfc51585abc0a|4dd1ea5a523ed945|353207600||t20739.8164584835s|s65767375b|65767375|rds|local|vector|||36.457|Tree is not strictly ultrametric. Adjusting with chronos().|
+syntopy_predictors_step|stem|cce532ace38a48c5|5b680aa09798bb9c|8471fe8f132ff287|-1948914524||t20739.8169431716s|s3455b|3455|rds|local|vector|||40.428||

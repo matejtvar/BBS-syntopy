@@ -91,14 +91,18 @@ plot(tree, type = "fan", cex = 0.3, tip.color = "darkblue")
 sister_pairs <- diverge::extract_sisters(tree)
 dim(sister_pairs) # 96 species pairs
 
+# extract sister species age
+source(here::here("R/functions/extract_age.R"))
+sister_pairs <- extract_sister_ages(sister_pairs = sister_pairs, phylo_tree = tree)
+
+# 3. Get the species ranges from ebirdst ----------------------------------
+
 # extract vector of sister species names
 sp1 <- sister_pairs$sp1
 sp2 <- sister_pairs$sp2
 sister_names <- c(sp1,sp2)
 length(sister_names)
 # We need to get range data for 192 species
-
-# 3. Get the species ranges from ebirdst ----------------------------------
 
 # An access key is required to download eBird Status and Trends data
 # set_ebirdst_access_key("") at the website https://ebird.org/st/request
@@ -149,11 +153,11 @@ if (length(failed) > 0) {
   warning(sprintf("%d species failed to load ranges", length(failed)))
 }
 
-# Save objects needed for downstream scripts
-# save(
-#   dat,
-#   sister_pairs,
-#   sister_names,
-#   ranges,
-#   file = here::here("data/imported_bbs_data.RData")
-# )
+# Assign species scientific names as list element names
+names(ranges) <- sister_names
+
+# Verify that indexing by species name now works
+ranges[["Passerina ciris"]]
+
+# Check if all element names match their internal scientific_name
+all(names(ranges) == sapply(ranges, function(x) x$scientific_name[1]))

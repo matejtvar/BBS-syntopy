@@ -16,20 +16,12 @@ library(testthat)
 library(usethis)
 library(tidyr)
 library(ggplot2)
+library(targets)
 
 # 1. Calculate degree of sympatry for each pair -------------------------------------
 
-# create empty vector
-sister_pairs$sympatry <- vector(mode = "numeric", length = nrow(sister_pairs))
-
-# Assign species scientific names as list element names
-names(ranges) <- sister_names
-
-# Verify that indexing by species name now works
-ranges[["Passerina ciris"]]
-
-# Check if all element names match their internal scientific_name
-all(names(ranges) == sapply(ranges, function(x) x$scientific_name[1]))
+# Source function
+source(here::here("R/functions/calculate_sympatry.R"))
 
 # Calculate sympatry for every pair in sister_pairs
 
@@ -125,9 +117,12 @@ route_syntopy_summary <- route_syntopy_by_year |>
 
 # 3. Range symmetry and other range metrics -------------------------------
 
+# Source function
+source(here::here("R/functions/calculate_symmetry.R"))
+
 # Calculate range symmetry
 
-sister_pairs <- sister_pairs |>
+sympatric_pairs <- sympatric_pairs |>
   dplyr::mutate(
     symmetry = map2_dbl(sp1, sp2, \(sp1, sp2) {
       calculate_symmetry(
@@ -136,9 +131,12 @@ sister_pairs <- sister_pairs |>
     })
   )
 
+# Source function
+source(here::here("R/functions/calculate_cen_dist.R"))
+
 # Calculate centroid distance of the ranges for every pair in sister_pairs
 
-sister_pairs <- sister_pairs |>
+sympatric_pairs <- sympatric_pairs |>
   mutate(
     centroid_dist_km = map2_dbl(sp1, sp2, \(s1, s2) {
       calculate_centroid_distance(
@@ -150,3 +148,60 @@ sister_pairs <- sister_pairs |>
       )
     })
   )
+
+# Visual exploration of predictors
+par(mfrow = c(2,2))
+hist(sympatric_pairs$sympatry, breaks = 12, main="Degree of Sympatry", xlab="Range overlap (%)", col="darkseagreen3")
+hist(sympatric_pairs$symmetry, breaks = 12, main="Degree of Range Symmetry", xlab="Range symmetry (from 0 to 0.5)", col="darkseagreen4")
+hist(sympatric_pairs$age_myr, breaks = 12, main="Evolutionary age", xlab="Evolutionary age (myr)", col="steelblue")
+hist(sympatric_pairs$centroid_dist_km, breaks = 12, main="Distance Between Species Range Centroids", xlab="Geographical Distance (Km)", col="steelblue2")
+
+par(mfrow = c(1,1))
+
+# 4. Syntopy on route scale ----------------------------------------------
+
+# Year 2018
+year <- 2018
+
+# Load targets data
+sympatric_pairs <- tar_read(syntopy_predictors_step)
+data_import <- tar_read(data_import_step)
+ranges <- data_import$ranges
+dat <- data_import$dat |>
+  dplyr::filter(Year == year) |>
+  sf::st_as_sf(crs = 4326)
+
+# Verify it is valid before mapping
+assertthat::assert_that(inherits(dat, "sf"), msg = "dat is still not an sf object!")
+
+# Source the updated Fisher's Hypergeometric route syntopy function
+source(here::here("R/functions/calculate_route_syntopy.R"))
+
+# Map calculate_route_syntopy across all sympatric sister pairs
+syntopy_results <- map2_dfr(
+  sympatric_pairs$sp1,
+  sympatric_pairs$sp2,
+  \(s1, s2) {
+    calculate_route_syntopy(
+      sp1 = s1,
+      sp2 = s2,
+      range_list = ranges,
+      bbs_dat = dat,
+      season_filter = c("breeding", "resident")
+    )
+  }
+)
+
+# Bind the resulting hypergeometric counts (N, m1, m2, k, empirical_log_OR) directly
+sympatric_pairs <- bind_cols(sympatric_pairs, syntopy_results)
+
+
+# We have to standardise it prior to modelling.
+X_sympatry <- (sympatry - mean(sympatry)) / sd(sympatry) # X3
+hist(X_sympatry, breaks = 12, main="zSympatry (Standardised)", xlab="Z-score", col="steelblue")
+
+# Filter out pairs with no overlapping routes sampled (N == 0) for modeling
+route_data <- sympatric_pairs |>
+  filter(N > 0, !is.na(empirical_log_OR))
+
+message(sprintf("Ready for Bayesian modeling: %d pairs with valid overlap routes", nrow(modeling_ready_pairs)))

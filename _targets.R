@@ -1,39 +1,34 @@
 library(targets)
 
-# 1. Global pipeline settings
 tar_option_set(
-  packages = c("dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr", "ggplot", "tidyr"),
+  packages = c("dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr", "ggplot2", "tidyr", "ape"),
   format = "rds"
 )
 
-# 2. Source main workflow scripts AND subfolder functions
-# Option A: If functions/ is inside R/ (e.g. R/functions/)
-tar_source("R")
-
-# Option B: If functions/ is at the root project directory level
-# tar_source(c("R", "functions"))
-
-
-# 3. Define the Targets pipeline
 list(
-  # Track raw files
+  # Track raw data files and script files
   tar_target(bbs_file, "data/bbs_data/bbs_dataset.RData", format = "file"),
-  tar_target(tree_path, "data/AvesDataLite-main", format = "file"),
+  tar_target(script_import, "R/data_import.R", format = "file"),
+  tar_target(script_predictors, "R/syntopy_predictors.R", format = "file"),
 
-  # 1. Data Import
-  tar_target(bbs_data, load_bbs_data(bbs_file)),
-  tar_target(sister_names, get_sister_names(bbs_data, tree_path)),
-  tar_target(ranges, load_species_ranges(sister_names)),
-
-  # 2. Syntopy Predictors (uses calculate_symmetry() and calculate_sympatry())
+  # 1. Run data_import.R script directly
   tar_target(
-    syntopy_data,
-    compute_syntopy_predictors(ranges, bbs_data) # Function defined in syntopy_predictors.R
+    data_import_step,
+    {
+      # Accessing script_import ensures changes in R/data_import.R trigger a re-run
+      source(script_import)
+      list(dat = dat, sister_pairs = sister_pairs, sister_names = sister_names, ranges = ranges)
+    }
   ),
 
-  # 3. Modelling
-  tar_target(models, run_models(syntopy_data)), # Defined in modelling.R
-
-  # 4. Final Analysis
-  tar_target(final_outputs, run_final_analysis(models)) # Defined in final_analysis.R
+  # 2. Run syntopy_predictors.R script directly
+  tar_target(
+    syntopy_predictors_step,
+    {
+      # Force dependency on step 1 and script changes
+      data_import_outputs <- data_import_step
+      source(script_predictors)
+      sympatric_pairs
+    }
+  )
 )
