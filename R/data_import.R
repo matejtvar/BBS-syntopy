@@ -153,11 +153,11 @@ if (length(failed) > 0) {
   warning(sprintf("%d species failed to load ranges", length(failed)))
 }
 
-# Save objects needed for downstream scripts
-save(
-  dat,
-  sister_pairs,
-  sister_names,
-  ranges,
-  file = here::here("data/data_import.RData")
-)
+# Assign species scientific names as list element names
+names(ranges) <- sister_names
+
+# Verify that indexing by species name now works
+ranges[["Passerina ciris"]]
+
+# Check if all element names match their internal scientific_name
+all(names(ranges) == sapply(ranges, function(x) x$scientific_name[1]))
