@@ -7,11 +7,13 @@ dat_list <- list(
   m1 = as.integer(route_data$m1),
   m2 = as.integer(route_data$m2),
   N = as.integer(route_data$N),
-  cen_dist = as.numeric(route_data$centroid_dist_km),
-  age = as.numeric(route_data$age_myr),
+  cen_dist = as.numeric(route_data$cen_dist),
+  age = as.numeric(route_data$age),
   symmetry = as.numeric(route_data$symmetry),
   sympatry = as.numeric(route_data$sympatry)
 )
+
+cor(as.data.frame(dat_list[c("cen_dist", "age", "symmetry", "sympatry")]))
 
 # 2. Build model with ulam using matching parameter names (b_cen_dist, b_age, etc.)
 model <- ulam(
@@ -80,13 +82,9 @@ print(precis(out_routes, pars = target_pars))
 
 # 7. Plotting Posterior Estimates vs True Parameters
 # Order matches target_pars: b0, b_cen_dist, b_age, b_symmetry, b_sympatry
-true_values <- c(0.5, -0.7, 0.6, 0.3, 0.8)
-y_coords_reversed <- rev(c(5, 4, 3, 2, 1))
 
 plot(precis(out_routes, pars = target_pars),
      xlim = c(-1, 1),
      main = "Posterior Estimates vs. True Parameters")
 
 abline(v = 0, lty = 2, col = "gray50")
-points(x = true_values, y = y_coords_reversed, col = "deepskyblue3", pch = 18, cex = 2)
-legend("topright", legend = "True Parameter", col = "deepskyblue3", pch = 18, bty = "n")

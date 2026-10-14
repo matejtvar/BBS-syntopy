@@ -195,13 +195,14 @@ syntopy_results <- map2_dfr(
 # Bind the resulting hypergeometric counts (N, m1, m2, k, empirical_log_OR) directly
 sympatric_pairs <- bind_cols(sympatric_pairs, syntopy_results)
 
-
-# We have to standardise it prior to modelling.
-X_sympatry <- (sympatry - mean(sympatry)) / sd(sympatry) # X3
-hist(X_sympatry, breaks = 12, main="zSympatry (Standardised)", xlab="Z-score", col="steelblue")
+# We have to standardise it prior to modelling
+route_data <- sympatric_pairs |>
+  dplyr::mutate(sympatry = (sympatry - mean(sympatry)) / sd(sympatry)) |>
+  dplyr::mutate(symmetry = (symmetry - mean(symmetry)) / sd(symmetry)) |>
+  dplyr::mutate(age = (age_myr - mean(age_myr)) / sd(age_myr)) |>
+  dplyr::mutate(cen_dist = (centroid_dist_km - mean(centroid_dist_km)) / sd(centroid_dist_km)) |>
+  dplyr::select(-age_myr, -centroid_dist_km)
 
 # Filter out pairs with no overlapping routes sampled (N == 0) for modeling
-route_data <- sympatric_pairs |>
+route_data <- route_data |>
   filter(N > 0, !is.na(empirical_log_OR))
-
-message(sprintf("Ready for Bayesian modeling: %d pairs with valid overlap routes", nrow(modeling_ready_pairs)))
