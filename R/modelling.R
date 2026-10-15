@@ -1,6 +1,8 @@
 library(rethinking)
 library(rstan)
 
+route_data <- sympatric_pairs
+
 # 1. Prepare data list with your updated predictor names
 dat_list <- list(
   k = as.integer(route_data$k),

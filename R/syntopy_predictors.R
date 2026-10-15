@@ -37,14 +37,17 @@ sister_pairs <- sister_pairs |>
 # Check with map
 ranges_sf <- dplyr::bind_rows(ranges)
 
+species_1 <- "Piranga flava"
+species_2 <- "Piranga rubra"
+
 ranges_sf |>
-  dplyr::filter(scientific_name %in% c("Piranga flava", "Piranga rubra")) |>
+  dplyr::filter(scientific_name %in% c(species_1, species_2)) |>
   dplyr::filter(season == "breeding") |>
   ggplot() +
   geom_sf(aes(fill = scientific_name), alpha = 0.5, color = "black") +
   theme_minimal() +
   scale_fill_manual(
-    values = c("Piranga flava" = "firebrick", "Piranga rubra" = "steelblue")
+    values = stats::setNames(c("firebrick", "steelblue"), c(species_1, species_2))
   ) +
   labs(
     title = "Test Dataset Range Overlap",
@@ -155,24 +158,29 @@ hist(sympatric_pairs$sympatry, breaks = 12, main="Degree of Sympatry", xlab="Ran
 hist(sympatric_pairs$symmetry, breaks = 12, main="Degree of Range Symmetry", xlab="Range symmetry (from 0 to 0.5)", col="darkseagreen4")
 hist(sympatric_pairs$age_myr, breaks = 12, main="Evolutionary age", xlab="Evolutionary age (myr)", col="steelblue")
 hist(sympatric_pairs$centroid_dist_km, breaks = 12, main="Distance Between Species Range Centroids", xlab="Geographical Distance (Km)", col="steelblue2")
-
 par(mfrow = c(1,1))
+
+# We have to standardise predictors prior to modelling
+sympatric_pairs <- sympatric_pairs |>
+  dplyr::mutate(sympatry = (sympatry - mean(sympatry)) / sd(sympatry)) |>
+  dplyr::mutate(symmetry = (symmetry - mean(symmetry)) / sd(symmetry)) |>
+  dplyr::mutate(age = (age_myr - mean(age_myr)) / sd(age_myr)) |>
+  dplyr::mutate(cen_dist = (centroid_dist_km - mean(centroid_dist_km)) / sd(centroid_dist_km)) |>
+  dplyr::select(-age_myr, -centroid_dist_km)
 
 # 4. Syntopy on route scale ----------------------------------------------
 
-# Year 2018
-year <- 2018
+# Selecting year
+year <- 2019
 
 # Load targets data
-sympatric_pairs <- tar_read(syntopy_predictors_step)
-data_import <- tar_read(data_import_step)
-ranges <- data_import$ranges
-dat <- data_import$dat |>
+# sympatric_pairs <- tar_read(syntopy_predictors_step)
+# data_import <- tar_read(data_import_step)
+# ranges <- data_import$ranges
+# dat <- data_import$dat
+dat_year <- dat |>
   dplyr::filter(Year == year) |>
   sf::st_as_sf(crs = 4326)
-
-# Verify it is valid before mapping
-assertthat::assert_that(inherits(dat, "sf"), msg = "dat is still not an sf object!")
 
 # Source the updated Fisher's Hypergeometric route syntopy function
 source(here::here("R/functions/calculate_route_syntopy.R"))
@@ -186,7 +194,7 @@ syntopy_results <- map2_dfr(
       sp1 = s1,
       sp2 = s2,
       range_list = ranges,
-      bbs_dat = dat,
+      bbs_dat = dat_year,
       season_filter = c("breeding", "resident")
     )
   }
@@ -195,14 +203,8 @@ syntopy_results <- map2_dfr(
 # Bind the resulting hypergeometric counts (N, m1, m2, k, empirical_log_OR) directly
 sympatric_pairs <- bind_cols(sympatric_pairs, syntopy_results)
 
-# We have to standardise it prior to modelling
-route_data <- sympatric_pairs |>
-  dplyr::mutate(sympatry = (sympatry - mean(sympatry)) / sd(sympatry)) |>
-  dplyr::mutate(symmetry = (symmetry - mean(symmetry)) / sd(symmetry)) |>
-  dplyr::mutate(age = (age_myr - mean(age_myr)) / sd(age_myr)) |>
-  dplyr::mutate(cen_dist = (centroid_dist_km - mean(centroid_dist_km)) / sd(centroid_dist_km)) |>
-  dplyr::select(-age_myr, -centroid_dist_km)
-
 # Filter out pairs with no overlapping routes sampled (N == 0) for modeling
-route_data <- route_data |>
+sympatric_pairs <- sympatric_pairs |>
   filter(N > 0, !is.na(empirical_log_OR))
+# Note: for 2019 and 2017 there is just 1 pair with N=0, while for 2018 there are 2 pairs
+

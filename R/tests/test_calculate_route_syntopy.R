@@ -85,3 +85,37 @@ test_that("calculate_route_syntopy returns 0s for non-overlapping ranges", {
   expect_equal(res$k, 0)
   expect_true(is.na(res$empirical_log_OR))
 })
+
+test_that("calculate_route_syntopy handles zero species counts across overlap sites correctly", {
+
+  sf::sf_use_s2(FALSE)
+  on.exit(sf::sf_use_s2(TRUE), add = TRUE)
+
+  # Create mock BBS data where routes fall inside overlap,
+  # but species counts/detections are zero (neither species is present on those routes)
+  pt_zero1 <- sf::st_point(c(6.5, 5)) # Inside overlap zone A/B
+  pt_zero2 <- sf::st_point(c(7.5, 5)) # Inside overlap zone A/B
+
+  mock_bbs_zeros <- sf::st_sf(
+    RTENO = c("RX1", "RX2"),
+    Year = rep(2019, 2),
+    Scientific_Name = c("Other Species", "Another Species"), # Neither Species A nor B
+    geometry = sf::st_sfc(pt_zero1, pt_zero2, crs = 4326)
+  )
+
+  res_zero <- calculate_route_syntopy(
+    sp1 = "Species A",
+    sp2 = "Species B",
+    range_list = mock_ranges,
+    bbs_dat = mock_bbs_zeros,
+    season_filter = "breeding"
+  )
+
+  # Even if routes exist in the overlap polygon, detected counts for Sp1 and Sp2 are 0
+  expect_equal(res_zero$m1, 0)
+  expect_equal(res_zero$m2, 0)
+  expect_equal(res_zero$k, 0)
+
+  # Log-odds ratio should safely handle zero counts (returning 0 or NA without throwing errors)
+  expect_true(is.numeric(res_zero$empirical_log_OR) || is.na(res_zero$empirical_log_OR))
+})

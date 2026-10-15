@@ -1,6 +1,15 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
 bbs_file|stem|118538afae6f70e6|5799fe520f27a563|2c530c1562a7fbd1|-457329800|data/bbs_data/bbs_dataset.RData|t20730.44403508s|s54609681b|54609681|file|local|vector|||0.001||
-script_predictors|stem|ed6195d54126946a|a0381bcbe0d173e1|2c530c1562a7fbd1|1870673548|R/syntopy_predictors.R|t20739.8157962052s|s6644b|6644|file|local|vector|||1.284||
-script_import|stem|1e67787fbd0085a8|64864e403e27facc|2c530c1562a7fbd1|-164169437|R/data_import.R|t20739.815641495s|s5435b|5435|file|local|vector|||0||
-data_import_step|stem|2a8eb7f5914d045f|d2fbfc51585abc0a|4dd1ea5a523ed945|353207600||t20739.8164584835s|s65767375b|65767375|rds|local|vector|||36.457|Tree is not strictly ultrametric. Adjusting with chronos().|
-syntopy_predictors_step|stem|cce532ace38a48c5|5b680aa09798bb9c|8471fe8f132ff287|-1948914524||t20739.8169431716s|s3455b|3455|rds|local|vector|||40.428||
+script_import|stem|42576452ce8364b0|64864e403e27facc|2c530c1562a7fbd1|-164169437|R/data_import.R|t20739.8410253242s|s5434b|5434|file|local|vector|||0||
+script_predictors|stem|59b34df81a7e1287|a0381bcbe0d173e1|2c530c1562a7fbd1|1870673548|R/syntopy_predictors.R|t20741.4404137899s|s7066b|7066|file|local|vector|||1.062||
+data_import_step|stem|62c17dc85b7e0302|efb781d7f4725fa3|a1503714be6ee63c|353207600||t20741.4925181259s|s65767287b|65767287|rds|local|vector|||36.985|Tree is not strictly ultrametric. Adjusting with chronos().|
+syntopy_predictors_step|stem|e2a05e536bc0dfb8|3b8f1e2ef10b605d|46966f8442ba338f|-1948914524||t20741.4969991616s|s4461b|4461|rds|local|vector|||385.743||
+fn_cen_dist|stem|2b5ed32dea89ebd1|2b8bc33af9d91a63|2c530c1562a7fbd1|1507532703|R/functions/calculate_cen_dist.R|t20740.4376958055s|s2530b|2530|file|local|vector|||1.771||
+fn_route_syntopy|stem|52b677ca8dcad46c|14fc8ba6caf9b20f|2c530c1562a7fbd1|987074661|R/functions/calculate_route_syntopy.R|t20740.4679112225s|s4364b|4364|file|local|vector|||0||
+fn_symmetry|stem|7a3991736cf1b447|09ba555ad722631c|2c530c1562a7fbd1|-2113797395|R/functions/calculate_symmetry.R|t20740.4378099371s|s2606b|2606|file|local|vector|||0||
+fn_sympatry|stem|0489ddc88a1224bc|e55e1931970222f5|2c530c1562a7fbd1|810329055|R/functions/calculate_sympatry.R|t20740.4380037675s|s2844b|2844|file|local|vector|||0.001||
+fn_extract_age|stem|d9e3a5214dfbca12|7bdbb264674832bd|2c530c1562a7fbd1|2039761110|R/functions/extract_age.R|t20735.6163275211s|s1454b|1454|file|local|vector|||0||
+syntopy_predictors|stem|e2a05e536bc0dfb8|14a32f94f0c932c8|e5ec841691fc102a|1688269370||t20741.510394482s|s4461b|4461|rds|local|vector|||375.283||
+ebirdst_dir|stem|d0365d684763e4f7|9c9238596481b1f6|2c530c1562a7fbd1|1765356250|/home/matejtvar/.local/share/R/ebirdst|t20643.3934324903s|s2786319512b|2786319512|file|local|vector|||1.417||
+taxonomy_dir|stem|ad5f90a6c2166b91|5fc699c8cd54f162|2c530c1562a7fbd1|2106296037|data/AvesDataLite-main|t20730.4440272328s|s989648237b|989648237|file|local|vector|||0||
+data_import|stem|62c17dc85b7e0302|25a2cc75ee3b06e9|9cc5e4ceb1b58cf3|-466612338||t20741.5125222601s|s65767287b|65767287|rds|local|vector|||36.31|Tree is not strictly ultrametric. Adjusting with chronos().|

@@ -1,33 +1,54 @@
 library(targets)
 
 tar_option_set(
-  packages = c("dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr", "ggplot2", "tidyr", "ape"),
+  packages = c("dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr", "ggplot2", "tidyr", "ape", "here"),
   format = "rds"
 )
 
 list(
-  # Track raw data files and script files
+  # 1. Track the raw data file, external directories, and custom function files as dependencies
   tar_target(bbs_file, "data/bbs_data/bbs_dataset.RData", format = "file"),
-  tar_target(script_import, "R/data_import.R", format = "file"),
-  tar_target(script_predictors, "R/syntopy_predictors.R", format = "file"),
+  tar_target(taxonomy_dir, "data/AvesDataLite-main", format = "file"),
+  tar_target(ebirdst_dir, ebirdst::ebirdst_data_dir(), format = "file"),
+  tar_target(fn_extract_age, "R/functions/extract_age.R", format = "file"),
+  tar_target(fn_sympatry, "R/functions/calculate_sympatry.R", format = "file"),
+  tar_target(fn_symmetry, "R/functions/calculate_symmetry.R", format = "file"),
+  tar_target(fn_cen_dist, "R/functions/calculate_cen_dist.R", format = "file"),
+  tar_target(fn_route_syntopy, "R/functions/calculate_route_syntopy.R", format = "file"),
 
-  # 1. Run data_import.R script directly
+  # 2. Data Import Target: Sources R/data_import.R
   tar_target(
-    data_import_step,
+    data_import,
     {
-      # Accessing script_import ensures changes in R/data_import.R trigger a re-run
-      source(script_import)
-      list(dat = dat, sister_pairs = sister_pairs, sister_names = sister_names, ranges = ranges)
+      # Mention function, dataset, and directory dependencies so targets watches them for changes
+      dummy_deps <- c(bbs_file, taxonomy_dir, ebirdst_dir, fn_extract_age)
+
+      # Execute your data import script directly
+      source(here::here("R/data_import.R"))
+
+      # Return the objects created by your script to cache them
+      list(
+        dat = dat,
+        sister_pairs = sister_pairs,
+        ranges = ranges,
+        sister_names = sister_names
+      )
     }
   ),
 
-  # 2. Run syntopy_predictors.R script directly
+  # 3. Syntopy Predictors Target: Sources R/syntopy_predictors.R
   tar_target(
-    syntopy_predictors_step,
+    syntopy_predictors,
     {
-      # Force dependency on step 1 and script changes
-      data_import_outputs <- data_import_step
-      source(script_predictors)
+      # Mention script and helper function dependencies so targets watches them
+      dummy_deps <- c(fn_sympatry, fn_symmetry, fn_cen_dist, fn_route_syntopy)
+
+      dat <- data_import$dat
+      sister_pairs <- data_import$sister_pairs
+      ranges <- data_import$ranges
+
+      source(here::here("R/syntopy_predictors.R"))
+
       sympatric_pairs
     }
   )
