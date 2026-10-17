@@ -25,8 +25,6 @@ library(purrr)
 
 # Download BBS data
 # bbs <- grab_bbs_data()  Using bbsAssistent package
-# load BBS dataset
-# Merge BBS dataframes and clean the data
 
 here::here(load("data/bbs_data/bbs_dataset.RData")) # Release 2019
 
@@ -85,7 +83,7 @@ tree <- clootl::extractTree(species = species_names,
                          version = "1.5",
                          data_path= here::here("data/AvesDataLite-main"))
 
-plot(tree, type = "fan", cex = 0.3, tip.color = "darkblue")
+# plot(tree, type = "fan", cex = 0.3, tip.color = "darkblue")
 
 # extract sister species pairs
 sister_pairs <- diverge::extract_sisters(tree)

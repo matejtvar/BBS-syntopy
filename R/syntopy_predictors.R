@@ -17,6 +17,9 @@ library(usethis)
 library(tidyr)
 library(ggplot2)
 library(targets)
+library(cluster)
+library(tibble)
+library(readxl)
 
 # 1. Calculate degree of sympatry for each pair -------------------------------------
 
@@ -168,14 +171,48 @@ sympatric_pairs <- sympatric_pairs |>
   dplyr::mutate(cen_dist = (centroid_dist_km - mean(centroid_dist_km)) / sd(centroid_dist_km)) |>
   dplyr::select(-age_myr, -centroid_dist_km)
 
-# 4. Syntopy on route scale ----------------------------------------------
+
+# 4. Environmental predictors ---------------------------------------------
+
+routes <- dat |>
+  dplyr::select(RTENO, geometry) |>
+  dplyr::distinct()
+
+
+
+# 5. Trait and niche similarity predictors --------------------------------
+
+# Avoniche data
+# Available here: https://datadryad.org/dataset/doi:10.5061/dryad.1zcrjdg56
+
+avoniche <- read.csv(here::here("data/Avoniche2_eBird2021.csv"))
+
+avoniche <- avoniche |>
+  dplyr::filter(Species2 %in% sister_names) |>
+  dplyr::select(-Family2, -Order2, -Avibase_id, -MainDiet, -MainNiche, -Inferred) |>
+  tibble::column_to_rownames("Species2")
+
+# Calculate Gower distance
+gower_dist <- cluster::daisy(avoniche, metric = "gower")
+# Convert to a standard square matrix for easy lookup
+gower_matrix <- as.matrix(gower_dist)
+
+# gawdis package?
+
+
+# Avonet data
+# Available here: https://figshare.com/s/b990722d72a26b5bfead
+
+avonet <- readxl::read_excel("data/AVONET Supplementary dataset 1.xlsx",
+                                             sheet = "AVONET2_eBird")
+avonet <- avonet |>
+  dplyr::filter(Species2 %in% sister_names)
+
+# 6. Syntopy on route scale ----------------------------------------------
 
 # Selecting year
 year <- 2019
 
-# Load targets data
-# sympatric_pairs <- tar_read(syntopy_predictors_step)
-# data_import <- tar_read(data_import_step)
 # ranges <- data_import$ranges
 # dat <- data_import$dat
 dat_year <- dat |>
@@ -207,4 +244,8 @@ sympatric_pairs <- bind_cols(sympatric_pairs, syntopy_results)
 sympatric_pairs <- sympatric_pairs |>
   filter(N > 0, !is.na(empirical_log_OR))
 # Note: for 2019 and 2017 there is just 1 pair with N=0, while for 2018 there are 2 pairs
+
+
+# 7. Syntopy on stop scale ------------------------------------------------
+
 
