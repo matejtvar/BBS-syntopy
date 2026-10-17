@@ -10,7 +10,7 @@
 #' @export
 calculate_symmetry <- function(sp1, sp2, range_list, season_filter = "breeding") {
 
-  # --- Input Assertions ---
+  # --- Assertions ---
   assertthat::assert_that(
     is.character(sp1) && length(sp1) == 1 && nchar(sp1) > 0,
     msg = "Argument 'sp1' must be a non-empty character string."

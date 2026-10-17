@@ -1,17 +1,21 @@
 library(rethinking)
 library(rstan)
 
+data <- stop_data
+
 # 1. Prepare data list with your updated predictor names
 dat_list <- list(
-  k = as.integer(route_data$k),
-  m1 = as.integer(route_data$m1),
-  m2 = as.integer(route_data$m2),
-  N = as.integer(route_data$N),
-  cen_dist = as.numeric(route_data$centroid_dist_km),
-  age = as.numeric(route_data$age_myr),
-  symmetry = as.numeric(route_data$symmetry),
-  sympatry = as.numeric(route_data$sympatry)
+  k = as.integer(data$k),
+  m1 = as.integer(data$m1),
+  m2 = as.integer(data$m2),
+  N = as.integer(data$N),
+  cen_dist = as.numeric(data$cen_dist),
+  age = as.numeric(data$age),
+  symmetry = as.numeric(data$symmetry),
+  sympatry = as.numeric(data$sympatry)
 )
+
+cor(as.data.frame(dat_list[c("cen_dist", "age", "symmetry", "sympatry")]))
 
 # 2. Build model with ulam using matching parameter names (b_cen_dist, b_age, etc.)
 model <- ulam(
@@ -46,10 +50,10 @@ stan_code <- stancode(model)
 
 # 4. Fix Stan array syntax and loop indexing for modern compilers
 stan_code_fixed <- stan_code |>
-  gsub("int N\\[57\\];", "array[57] int N;", x = _) |>
-  gsub("int m2\\[57\\];", "array[57] int m2;", x = _) |>
-  gsub("int m1\\[57\\];", "array[57] int m1;", x = _) |>
-  gsub("int k\\[57\\];", "array[57] int k;", x = _) |>
+  gsub("int N\\[51\\];", "array[51] int N;", x = _) |>
+  gsub("int m2\\[51\\];", "array[51] int m2;", x = _) |>
+  gsub("int m1\\[51\\];", "array[51] int m1;", x = _) |>
+  gsub("int k\\[51\\];", "array[51] int k;", x = _) |>
   gsub(
     "target \\+= fisher_hyper_lpmf\\(k\\[i\\] \\| exp\\(log_alpha\\[i\\]\\), m1, m2, N\\);",
     "target += fisher_hyper_lpmf(k[i] | exp(log_alpha[i]), m1[i], m2[i], N[i]);",
@@ -60,33 +64,29 @@ stan_code_fixed <- stan_code |>
 full_stan_code <- paste0(likelihood_pmf, "\n", stan_code_fixed)
 
 # 5. Fit the model using rstan
-out_routes <- stan(
-  model_code = full_stan_code,
-  data = dat_list,
-  chains = 4,
-  cores = 4,
-  iter = 2000,
-  seed = 1
-)
+# out_routes <- stan(
+#   model_code = full_stan_code,
+#   data = dat_list,
+#   chains = 4,
+#   cores = 4,
+#   iter = 2000,
+#   seed = 1
+# )
 
 # Define parameter vector for clean reuse in diagnostics/plots
 target_pars <- c("b0", "b_cen_dist", "b_age", "b_symmetry", "b_sympatry")
 
 # 6. Diagnostics & Summaries
-par(mfrow = c(1, 1))
-traceplot(out_routes, pars = target_pars)
-
-print(precis(out_routes, pars = target_pars))
+# par(mfrow = c(1, 1))
+# traceplot(out_routes, pars = target_pars)
+#
+# print(precis(out_routes, pars = target_pars))
 
 # 7. Plotting Posterior Estimates vs True Parameters
 # Order matches target_pars: b0, b_cen_dist, b_age, b_symmetry, b_sympatry
-true_values <- c(0.5, -0.7, 0.6, 0.3, 0.8)
-y_coords_reversed <- rev(c(5, 4, 3, 2, 1))
 
-plot(precis(out_routes, pars = target_pars),
-     xlim = c(-1, 1),
-     main = "Posterior Estimates vs. True Parameters")
-
-abline(v = 0, lty = 2, col = "gray50")
-points(x = true_values, y = y_coords_reversed, col = "deepskyblue3", pch = 18, cex = 2)
-legend("topright", legend = "True Parameter", col = "deepskyblue3", pch = 18, bty = "n")
+# plot(precis(out_routes, pars = target_pars),
+#      xlim = c(-1, 1),
+#      main = "Posterior Estimates vs. True Parameters")
+#
+# abline(v = 0, lty = 2, col = "gray50")

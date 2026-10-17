@@ -12,7 +12,7 @@ calculate_centroid_distance <- function(sp1, sp2, range_list,
                                         season_filter = c("breeding", "resident"),
                                         unit = "km") {
 
-  # --- Input Assertions ---
+  # --- Assertions ---
   assertthat::assert_that(
     is.character(sp1) && length(sp1) == 1 && nchar(sp1) > 0,
     msg = "Argument 'sp1' must be a non-empty character string."

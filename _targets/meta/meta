@@ -1,6 +1,8 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+avonet_file|stem|4eb1b6b4970044fd|ec25bbd21a2f7a6a|2c530c1562a7fbd1|1184267526|data/AVONET Supplementary dataset 1.xlsx|t20743.5183658899s|s21524673b|21524673|file|local|vector|||1.135||
+avoniche_file|stem|40fec8882daeac77|4dcabb1b367f323f|2c530c1562a7fbd1|-157588412|data/Avoniche2_eBird2021.csv|t20743.477159959s|s1746267b|1746267|file|local|vector|||0||
+ebirdst_dir|stem|d0365d684763e4f7|9c9238596481b1f6|2c530c1562a7fbd1|1765356250|/home/matejtvar/.local/share/R/ebirdst|t20643.3934324903s|s2786319512b|2786319512|file|local|vector|||0.001||
+taxonomy_dir|stem|ad5f90a6c2166b91|5fc699c8cd54f162|2c530c1562a7fbd1|2106296037|data/AvesDataLite-main|t20730.4440272328s|s989648237b|989648237|file|local|vector|||0||
 bbs_file|stem|118538afae6f70e6|5799fe520f27a563|2c530c1562a7fbd1|-457329800|data/bbs_data/bbs_dataset.RData|t20730.44403508s|s54609681b|54609681|file|local|vector|||0.001||
-script_predictors|stem|ed6195d54126946a|a0381bcbe0d173e1|2c530c1562a7fbd1|1870673548|R/syntopy_predictors.R|t20739.8157962052s|s6644b|6644|file|local|vector|||1.284||
-script_import|stem|1e67787fbd0085a8|64864e403e27facc|2c530c1562a7fbd1|-164169437|R/data_import.R|t20739.815641495s|s5435b|5435|file|local|vector|||0||
-data_import_step|stem|2a8eb7f5914d045f|d2fbfc51585abc0a|4dd1ea5a523ed945|353207600||t20739.8164584835s|s65767375b|65767375|rds|local|vector|||36.457|Tree is not strictly ultrametric. Adjusting with chronos().|
-syntopy_predictors_step|stem|cce532ace38a48c5|5b680aa09798bb9c|8471fe8f132ff287|-1948914524||t20739.8169431716s|s3455b|3455|rds|local|vector|||40.428||
+data_import|stem|c1ac529f3c5f7b58|177f068969eeca36|a9174a9affeac738|-466612338||t20743.7721940445s|s65783196b|65783196|rds|local|vector|||59.011|Tree is not strictly ultrametric. Adjusting with chronos().|
+syntopy_predictors|stem|d1910aaf1b60aff6|20f3f06164343c05|213ff4fa2de2041f|1688269370||t20743.7761366195s|s6735b|6735|rds|local|vector|||339.329||
