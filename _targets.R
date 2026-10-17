@@ -7,29 +7,24 @@ tar_option_set(
   ),
   format = "rds"
 )
+# tar_source()
 
 list(
   # 1. Track raw input files and directories as file targets
   tar_target(bbs_file, "data/bbs_data/bbs_dataset.RData", format = "file"),
   tar_target(taxonomy_dir, "data/AvesDataLite-main", format = "file"),
   tar_target(ebirdst_dir, ebirdst::ebirdst_data_dir(), format = "file"),
+  tar_target(avoniche_file, "data/Avoniche2_eBird2021.csv", format = "file"),
+  tar_target(avonet_file, "data/AVONET Supplementary dataset 1.xlsx", format = "file"),
 
-  # 2. Data Import Target: Sources R/data_import.R
+  # 2. Data Import & Initial Filtering Target: Sources R/data_import.R
   tar_target(
     data_import,
     {
-      file_deps <- c(bbs_file, taxonomy_dir, ebirdst_dir)
+      file_deps <- c(bbs_file, taxonomy_dir, ebirdst_dir, avoniche_file, avonet_file)
 
-      # Execute your data import script directly
-      source(here::here("R/data_import.R"))
-
-      # Return the objects created by your script to cache them
-      list(
-        dat = dat,
-        sister_pairs = sister_pairs,
-        ranges = ranges,
-        sister_names = sister_names
-      )
+      # Execute data import script locally and capture its returned list of objects
+      source(here::here("R/data_import.R"), local = TRUE)$value
     }
   ),
 
@@ -37,16 +32,12 @@ list(
   tar_target(
     syntopy_predictors,
     {
-      # Extract objects from data_import
-      dat <- data_import$dat
-      sister_pairs <- data_import$sister_pairs
-      sister_names <- data_import$sister_names
-      ranges <- data_import$ranges
+      # Unpack all objects from data_import directly into this target's execution environment
+      # (Makes dat, sympatric_pairs, ranges, gower_matrix, etc., directly available)
+      list2env(data_import, envir = environment())
 
-
-      source(here::here("R/syntopy_predictors.R"))
-
-      sympatric_pairs
+      # Execute syntopy predictors script and return its final output list
+      source(here::here("R/syntopy_predictors.R"), local = TRUE)$value
     }
   )
 )

@@ -21,209 +21,20 @@ library(cluster)
 library(tibble)
 library(readxl)
 
-# 1. Calculate degree of sympatry for each pair -------------------------------------
-
-# Source function
-source(here::here("R/functions/calculate_sympatry.R"))
-
-# Calculate sympatry for every pair in sister_pairs
-
-sister_pairs <- sister_pairs |>
-  dplyr::mutate(
-    sympatry = map2_dbl(sp1, sp2, \(sp1, sp2) {
-      calculate_sympatry(
-        sp1 = sp1, sp2 = sp2,
-        range_list = ranges, season_filter = c("breeding", "resident"))
-    })
-  )
-
-# Check with map
-ranges_sf <- dplyr::bind_rows(ranges)
-
-species_1 <- "Piranga flava"
-species_2 <- "Piranga rubra"
-
-ranges_sf |>
-  dplyr::filter(scientific_name %in% c(species_1, species_2)) |>
-  dplyr::filter(season == "breeding") |>
-  ggplot() +
-  geom_sf(aes(fill = scientific_name), alpha = 0.5, color = "black") +
-  theme_minimal() +
-  scale_fill_manual(
-    values = stats::setNames(c("firebrick", "steelblue"), c(species_1, species_2))
-  ) +
-  labs(
-    title = "Test Dataset Range Overlap",
-    fill = "Species"
-  )
-
-# 2. Check the number of valid pairs for analysis -------------------------
-
-# Filter sister pairs for sympatry threshold 5 %
-sympatric_pairs <- sister_pairs |>
-  dplyr::filter(sympatry > 5)
-nrow(sympatric_pairs)
-# There are 59 sympatric sister pairs in the data over the 3 selected years
-
-# Extract unique species-route-year occurrences from BBS data
-bbs_occurrences <- dat |>
-  sf::st_drop_geometry() |>
-  dplyr::select(RTENO, Year, Scientific_Name) |>
-  dplyr::distinct()
-
-# Check for presence of each species in each year
-# (Species present in a given year if observed on >= 1 route)
-species_by_year <- bbs_occurrences |>
-  dplyr::group_by(Year, Scientific_Name) |>
-  dplyr::summarise(detected = TRUE, .groups = "drop")
-
-# Determine co-presence for each sympatric pair by year
-pairs_by_year <- sympatric_pairs |>
-  dplyr::cross_join(tibble::tibble(Year = c(2017, 2018, 2019))) |>
-  dplyr::left_join(
-    species_by_year,
-    by = c("sp1" = "Scientific_Name", "Year" = "Year")
-  ) |>
-  dplyr::rename(sp1_present = detected) |>
-  dplyr::left_join(
-    species_by_year,
-    by = c("sp2" = "Scientific_Name", "Year" = "Year")
-  ) |>
-  dplyr::rename(sp2_present = detected) |>
-  dplyr::mutate(
-    sp1_present = tidyr::replace_na(sp1_present, FALSE),
-    sp2_present = tidyr::replace_na(sp2_present, FALSE),
-    both_present = sp1_present & sp2_present
-  )
-
-# Count of sympatric pairs detected per year
-annual_summary <- pairs_by_year |>
-  dplyr::group_by(Year) |>
-  dplyr::summarise(
-    total_sympatric_pairs = dplyr::n(),
-    sp1_detected = sum(sp1_present),
-    sp2_detected = sum(sp2_present),
-    both_detected_in_bbs = sum(both_present)
-  )
-
-# Find routes where both sp1 and sp2 were observed in the same year
-route_syntopy_by_year <- sympatric_pairs |>
-  dplyr::inner_join(bbs_occurrences, by = c("sp1" = "Scientific_Name"),relationship = "many-to-many") |>
-  dplyr::inner_join(bbs_occurrences, by = c("sp2" = "Scientific_Name", "RTENO" = "RTENO", "Year" = "Year")) |>
-  dplyr::group_by(Year, sp1, sp2) |>
-  dplyr::summarise(n_shared_routes = dplyr::n(), .groups = "drop")
-
-# Summary count of sister pairs sharing at least one route per year
-route_syntopy_summary <- route_syntopy_by_year |>
-  dplyr::group_by(Year) |>
-  dplyr::summarise(pairs_sharing_routes = dplyr::n_distinct(sp1, sp2))
-# There are around 50 sister pairs sharing at least one route for each year
-# We need to select all 59 sympatric pairs (despite their absence of shared routes),
-# because we are interested in the degree of syntopy in the sympatric zone
-
-# 3. Range symmetry and other range metrics -------------------------------
-
-# Source function
-source(here::here("R/functions/calculate_symmetry.R"))
-
-# Calculate range symmetry
-
-sympatric_pairs <- sympatric_pairs |>
-  dplyr::mutate(
-    symmetry = map2_dbl(sp1, sp2, \(sp1, sp2) {
-      calculate_symmetry(
-        sp1 = sp1, sp2 = sp2,
-        range_list = ranges, season_filter = c("breeding", "resident"))
-    })
-  )
-
-# Source function
-source(here::here("R/functions/calculate_cen_dist.R"))
-
-# Calculate centroid distance of the ranges for every pair in sister_pairs
-
-sympatric_pairs <- sympatric_pairs |>
-  mutate(
-    centroid_dist_km = map2_dbl(sp1, sp2, \(s1, s2) {
-      calculate_centroid_distance(
-        sp1 = s1,
-        sp2 = s2,
-        range_list = ranges,
-        season_filter = c("breeding", "resident"),
-        unit = "km"
-      )
-    })
-  )
-
-# Visual exploration of predictors
-par(mfrow = c(2,2))
-hist(sympatric_pairs$sympatry, breaks = 12, main="Degree of Sympatry", xlab="Range overlap (%)", col="darkseagreen3")
-hist(sympatric_pairs$symmetry, breaks = 12, main="Degree of Range Symmetry", xlab="Range symmetry (from 0 to 0.5)", col="darkseagreen4")
-hist(sympatric_pairs$age_myr, breaks = 12, main="Evolutionary age", xlab="Evolutionary age (myr)", col="steelblue")
-hist(sympatric_pairs$centroid_dist_km, breaks = 12, main="Distance Between Species Range Centroids", xlab="Geographical Distance (Km)", col="steelblue2")
-par(mfrow = c(1,1))
-
-# We have to standardise predictors prior to modelling
-sympatric_pairs <- sympatric_pairs |>
-  dplyr::mutate(sympatry = (sympatry - mean(sympatry)) / sd(sympatry)) |>
-  dplyr::mutate(symmetry = (symmetry - mean(symmetry)) / sd(symmetry)) |>
-  dplyr::mutate(age = (age_myr - mean(age_myr)) / sd(age_myr)) |>
-  dplyr::mutate(cen_dist = (centroid_dist_km - mean(centroid_dist_km)) / sd(centroid_dist_km)) |>
-  dplyr::select(-age_myr, -centroid_dist_km)
-
-
-# 4. Environmental predictors ---------------------------------------------
-
-routes <- dat |>
-  dplyr::select(RTENO, geometry) |>
-  dplyr::distinct()
-
-
-
-# 5. Trait and niche similarity predictors --------------------------------
-
-# Avoniche data
-# Available here: https://datadryad.org/dataset/doi:10.5061/dryad.1zcrjdg56
-
-avoniche <- read.csv(here::here("data/Avoniche2_eBird2021.csv"))
-
-avoniche <- avoniche |>
-  dplyr::filter(Species2 %in% sister_names) |>
-  dplyr::select(-Family2, -Order2, -Avibase_id, -MainDiet, -MainNiche, -Inferred) |>
-  tibble::column_to_rownames("Species2")
-
-# Calculate Gower distance
-gower_dist <- cluster::daisy(avoniche, metric = "gower")
-# Convert to a standard square matrix for easy lookup
-gower_matrix <- as.matrix(gower_dist)
-
-# gawdis package?
-
-
-# Avonet data
-# Available here: https://figshare.com/s/b990722d72a26b5bfead
-
-avonet <- readxl::read_excel("data/AVONET Supplementary dataset 1.xlsx",
-                                             sheet = "AVONET2_eBird")
-avonet <- avonet |>
-  dplyr::filter(Species2 %in% sister_names)
-
-# 6. Syntopy on route scale ----------------------------------------------
+# 1. Syntopy on route scale ----------------------------------------------
 
 # Selecting year
 year <- 2019
 
-# ranges <- data_import$ranges
-# dat <- data_import$dat
 dat_year <- dat |>
   dplyr::filter(Year == year) |>
   sf::st_as_sf(crs = 4326)
 
-# Source the updated Fisher's Hypergeometric route syntopy function
+# Sour Fisher's Hypergeometric route syntopy function
 source(here::here("R/functions/calculate_route_syntopy.R"))
 
 # Map calculate_route_syntopy across all sympatric sister pairs
-syntopy_results <- map2_dfr(
+route_syntopy <- map2_dfr(
   sympatric_pairs$sp1,
   sympatric_pairs$sp2,
   \(s1, s2) {
@@ -238,14 +49,101 @@ syntopy_results <- map2_dfr(
 )
 
 # Bind the resulting hypergeometric counts (N, m1, m2, k, empirical_log_OR) directly
-sympatric_pairs <- bind_cols(sympatric_pairs, syntopy_results)
+route_data <- bind_cols(sympatric_pairs, route_syntopy)
 
-# Filter out pairs with no overlapping routes sampled (N == 0) for modeling
-sympatric_pairs <- sympatric_pairs |>
+# Filter out pairs with no routes sampled (N == 0) for modeling
+route_data <- route_data |>
   filter(N > 0, !is.na(empirical_log_OR))
 # Note: for 2019 and 2017 there is just 1 pair with N=0, while for 2018 there are 2 pairs
 
+# 2. Syntopy on stop scale ------------------------------------------------
+stop_data <- route_data |>
+  dplyr::filter(k > 0) |>
+  dplyr::select(sp1, sp2)
 
-# 7. Syntopy on stop scale ------------------------------------------------
+# Source the function
+source(here::here("R/functions/calculate_stop_syntopy.R"))
+
+# Map across sympatric pairs (using your filtered route_data or sympatric_pairs)
+stop_syntopy_results <- map2_dfr(
+  stop_data$sp1,
+  stop_data$sp2,
+  \(s1, s2) {
+    calculate_stop_syntopy(
+      sp1 = s1,
+      sp2 = s2,
+      bbs_dat = dat_year
+    )
+  }
+)
+
+# Bind the stop metrics back into your dataset
+stop_data <- bind_cols(stop_data, stop_syntopy_results)
+
+# 3. Range symmetry and other range metrics -------------------------------
+
+# Source function
+source(here::here("R/functions/calculate_symmetry.R"))
+
+# Calculate range symmetry
+
+range_metrics <- sympatric_pairs |>
+  dplyr::mutate(
+    symmetry = map2_dbl(sp1, sp2, \(sp1, sp2) {
+      calculate_symmetry(
+        sp1 = sp1, sp2 = sp2,
+        range_list = ranges, season_filter = c("breeding", "resident"))
+    })
+  )
+
+# Source function
+source(here::here("R/functions/calculate_cen_dist.R"))
+
+# Calculate centroid distance of the ranges for every pair in sister_pairs
+
+range_metrics <- range_metrics |>
+  mutate(
+    centroid_dist_km = map2_dbl(sp1, sp2, \(s1, s2) {
+      calculate_centroid_distance(
+        sp1 = s1,
+        sp2 = s2,
+        range_list = ranges,
+        season_filter = c("breeding", "resident"),
+        unit = "km"
+      )
+    })
+  )
+
+# Visual exploration of predictors
+par(mfrow = c(2,2))
+hist(range_metrics$sympatry, breaks = 12, main="Degree of Sympatry", xlab="Range overlap (%)", col="darkseagreen3")
+hist(range_metrics$symmetry, breaks = 12, main="Degree of Range Symmetry", xlab="Range symmetry (from 0 to 0.5)", col="darkseagreen4")
+hist(range_metrics$age_myr, breaks = 12, main="Evolutionary age", xlab="Evolutionary age (myr)", col="steelblue")
+hist(range_metrics$centroid_dist_km, breaks = 12, main="Distance Between Species Range Centroids", xlab="Geographical Distance (Km)", col="steelblue2")
+par(mfrow = c(1,1))
+
+# We have to standardise predictors prior to modelling
+range_metrics <- range_metrics |>
+  dplyr::mutate(sympatry = (sympatry - mean(sympatry)) / sd(sympatry)) |>
+  dplyr::mutate(symmetry = (symmetry - mean(symmetry)) / sd(symmetry)) |>
+  dplyr::mutate(age = (age_myr - mean(age_myr)) / sd(age_myr)) |>
+  dplyr::mutate(cen_dist = (centroid_dist_km - mean(centroid_dist_km)) / sd(centroid_dist_km)) |>
+  dplyr::select(-age_myr, -centroid_dist_km)
+
+# 4. Trait and niche similarity predictors --------------------------------
+
+# Calculate Gower distance
+# gower_dist <- cluster::daisy(avoniche, metric = "gower")
+# # Convert to a standard square matrix for easy lookup
+# gower_matrix <- as.matrix(gower_dist)
+# gawdis package?
+
+# 5. Environmental predictors ---------------------------------------------
+# list2env(c(data_import, syntopy_predictors), envir = environment())
 
 
+list(
+  route_data = route_data,
+  stop_data = stop_data,
+  range_metrics = range_metrics
+)
