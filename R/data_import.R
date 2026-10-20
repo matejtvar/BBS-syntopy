@@ -258,8 +258,11 @@ route_syntopy_summary <- route_syntopy_by_year |>
   dplyr::group_by(Year) |>
   dplyr::summarise(pairs_sharing_routes = dplyr::n_distinct(sp1, sp2))
 
+# 6. Import environmental predictors ---------------------------------------------
 
-# 6. Import Avoniche and Avonet -------------------------------------------
+# Extract data only for valid routes!
+
+# 7. Import Avoniche and Avonet -------------------------------------------
 
 # Avoniche data
 # Available here: https://datadryad.org/dataset/doi:10.5061/dryad.1zcrjdg56
