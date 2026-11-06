@@ -30,7 +30,6 @@ dat_year <- dat |>
   dplyr::filter(Year == year) |>
   sf::st_as_sf(crs = 4326)
 
-# Sour Fisher's Hypergeometric route syntopy function
 source(here::here("R/functions/calculate_route_syntopy.R"))
 
 # Map calculate_route_syntopy across all sympatric sister pairs
@@ -48,7 +47,6 @@ route_syntopy <- map2_dfr(
   }
 )
 
-# Bind the resulting hypergeometric counts (N, m1, m2, k, empirical_log_OR) directly
 route_data <- bind_cols(sympatric_pairs, route_syntopy)
 
 # Filter out pairs with no routes sampled (N == 0) for modeling
@@ -57,17 +55,17 @@ route_data <- route_data |>
 # Note: for 2019 and 2017 there is just 1 pair with N=0, while for 2018 there are 2 pairs
 
 # 2. Syntopy on stop scale ------------------------------------------------
-stop_data <- route_data |>
+syntopic_routes <- route_data |>
   dplyr::filter(k > 0) |>
   dplyr::select(sp1, sp2)
 
 # Source the function
 source(here::here("R/functions/calculate_stop_syntopy.R"))
 
-# Map across sympatric pairs (using your filtered route_data or sympatric_pairs)
-stop_syntopy_results <- map2_dfr(
-  stop_data$sp1,
-  stop_data$sp2,
+# Map across sympatric pairs
+stop_syntopy <- map2_dfr(
+  syntopic_routes$sp1,
+  syntopic_routes$sp2,
   \(s1, s2) {
     calculate_stop_syntopy(
       sp1 = s1,
@@ -76,9 +74,6 @@ stop_syntopy_results <- map2_dfr(
     )
   }
 )
-
-# Bind the stop metrics back into your dataset
-stop_data <- bind_cols(stop_data, stop_syntopy_results)
 
 # 3. Range symmetry and other range metrics -------------------------------
 
@@ -114,21 +109,6 @@ range_metrics <- range_metrics |>
     })
   )
 
-# Visual exploration of predictors
-par(mfrow = c(2,2))
-hist(range_metrics$sympatry, breaks = 12, main="Degree of Sympatry", xlab="Range overlap (%)", col="darkseagreen3")
-hist(range_metrics$symmetry, breaks = 12, main="Degree of Range Symmetry", xlab="Range symmetry (from 0 to 0.5)", col="darkseagreen4")
-hist(range_metrics$age_myr, breaks = 12, main="Evolutionary age", xlab="Evolutionary age (myr)", col="steelblue")
-hist(range_metrics$centroid_dist_km, breaks = 12, main="Distance Between Species Range Centroids", xlab="Geographical Distance (Km)", col="steelblue2")
-par(mfrow = c(1,1))
-
-# We have to standardise predictors prior to modelling
-range_metrics <- range_metrics |>
-  dplyr::mutate(sympatry = (sympatry - mean(sympatry)) / sd(sympatry)) |>
-  dplyr::mutate(symmetry = (symmetry - mean(symmetry)) / sd(symmetry)) |>
-  dplyr::mutate(age = (age_myr - mean(age_myr)) / sd(age_myr)) |>
-  dplyr::mutate(cen_dist = (centroid_dist_km - mean(centroid_dist_km)) / sd(centroid_dist_km)) |>
-  dplyr::select(-age_myr, -centroid_dist_km)
 
 # 4. Trait and niche similarity predictors --------------------------------
 
@@ -144,6 +124,6 @@ range_metrics <- range_metrics |>
 
 list(
   route_data = route_data,
-  stop_data = stop_data,
+  stop_data = stop_syntopy,
   range_metrics = range_metrics
 )

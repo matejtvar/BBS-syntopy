@@ -21,6 +21,8 @@ library(diverge)
 library(sf)
 library(purrr)
 library(readxl)
+library(phytools)
+library(diverge)
 
 # 1. Preparing BBS data ---------------------------------------------------
 
@@ -91,8 +93,13 @@ sister_pairs <- diverge::extract_sisters(tree)
 dim(sister_pairs) # 96 species pairs
 
 # extract sister species age
+tree <- phytools::force.ultrametric(tree, method = "nnls")
+
 source(here::here("R/functions/extract_age.R"))
+
 sister_pairs <- extract_sister_ages(sister_pairs = sister_pairs, phylo_tree = tree)
+
+summary(sister_pairs)
 
 # 3. Get the species ranges from ebirdst ----------------------------------
 
