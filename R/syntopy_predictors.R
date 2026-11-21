@@ -140,20 +140,21 @@ range_metrics <- range_metrics |>
     })
   )
 
+# 4. Environmental predictors ---------------------------------------------
+# list2env(c(data_import, syntopy_predictors), envir = environment())
+ndvi_yr <- ndvi_sf |>
+  dplyr::filter(Year == year)
 
-# 4. Trait and niche similarity predictors --------------------------------
+stop_data_ndvi <- stop_data |>
+  dplyr::left_join(ndvi_yr, by = c("RTENO"))
+
+# 5. Trait and niche similarity predictors --------------------------------
 
 # Calculate Gower distance
 # gower_dist <- cluster::daisy(avoniche, metric = "gower")
 # # Convert to a standard square matrix for easy lookup
 # gower_matrix <- as.matrix(gower_dist)
 # gawdis package?
-
-
-
-# 5. Environmental predictors ---------------------------------------------
-# list2env(c(data_import, syntopy_predictors), envir = environment())
-
 
 list(
   route_data = route_data,

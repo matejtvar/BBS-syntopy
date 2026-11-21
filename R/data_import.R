@@ -267,7 +267,10 @@ route_syntopy_summary <- route_syntopy_by_year |>
 
 # 6. Import environmental predictors ---------------------------------------------
 
-# Extract data only for valid routes!
+# Read the GeoPackage prepared in jupyter notebook 'get_ndvi.ipynb'
+ndvi_sf <- st_read(here::here("python/ndvi_data.gpkg"))
+str(ndvi_sf)
+summary(ndvi_sf$NDVI_filled)
 
 # 7. Import Avoniche and Avonet -------------------------------------------
 
@@ -294,10 +297,10 @@ avonet <- avonet |>
 
 list(
   dat                   = dat,
-  sister_pairs          = sister_pairs,
   sympatric_pairs       = sympatric_pairs,
   ranges                = ranges,
   sister_names          = sister_names,
   avoniche              = avoniche,
-  avonet                = avonet
+  avonet                = avonet,
+  ndvi_sf               = ndvi_sf
 )
