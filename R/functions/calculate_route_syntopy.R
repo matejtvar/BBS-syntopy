@@ -13,7 +13,7 @@ library(assertthat)
 #' @param bbs_dat Spatial sf object of BBS observations (RTENO, Year, Scientific_Name, geometry)
 #' @param season_filter Seasons to include (default: c("breeding", "resident"))
 #'
-#' @return A 1-row tibble with N, m1, m2, k, and empirical_log_OR
+#' @return A 1-row tibble with N, m1, m2, k
 calculate_route_syntopy <- function(sp1, sp2, range_list, bbs_dat, season_filter = c("breeding", "resident")) {
 
   # --- Assertions ---
@@ -37,7 +37,7 @@ calculate_route_syntopy <- function(sp1, sp2, range_list, bbs_dat, season_filter
   r2 <- if ("season" %in% names(r2_raw)) dplyr::filter(r2_raw, season %in% season_filter) else r2_raw
 
   if (nrow(r1) == 0 || nrow(r2) == 0) {
-    return(tibble::tibble(N = 0, m1 = 0, m2 = 0, k = 0, empirical_log_OR = NA_real_))
+    return(tibble::tibble(N = 0, m1 = 0, m2 = 0, k = 0))
   }
 
   # 2. Compute spatial overlap polygon
@@ -47,7 +47,7 @@ calculate_route_syntopy <- function(sp1, sp2, range_list, bbs_dat, season_filter
   overlap_poly <- suppressWarnings(sf::st_intersection(g1, g2))
 
   if (length(overlap_poly) == 0 || sf::st_is_empty(overlap_poly)) {
-    return(tibble::tibble(N = 0, m1 = 0, m2 = 0, k = 0, empirical_log_OR = NA_real_))
+    return(tibble::tibble(N = 0, m1 = 0, m2 = 0, k = 0))
   }
 
   # Match CRS
@@ -68,7 +68,7 @@ calculate_route_syntopy <- function(sp1, sp2, range_list, bbs_dat, season_filter
   N_routes <- nrow(routes_in_overlap)
 
   if (N_routes == 0) {
-    return(tibble::tibble(N = 0, m1 = 0, m2 = 0, k = 0, empirical_log_OR = NA_real_))
+    return(tibble::tibble(N = 0, m1 = 0, m2 = 0, k = 0))
   }
 
   # 4. Filter observations strictly on routes within the overlap polygon
@@ -86,24 +86,11 @@ calculate_route_syntopy <- function(sp1, sp2, range_list, bbs_dat, season_filter
   m2 <- length(sp2_routes)                     # Routes with Species 2
   k  <- length(intersect(sp1_routes, sp2_routes)) # Routes with BOTH (Co-occurrence)
 
-  # Contingency matrix entries for empirical log OR calculation:
-  # a = k (both present)
-  # b = m1 - k (only sp1)
-  # c = m2 - k (only sp2)
-  # d = N - m1 - m2 + k (both absent)
-  a <- k
-  b <- m1 - k
-  c <- m2 - k
-  d <- N_routes - m1 - m2 + k
-
-  # Haldane-Anscombe 0.5 continuity correction for empirical log-odds ratio
-  empirical_log_or <- log(((a + 0.5) * (d + 0.5)) / ((b + 0.5) * (c + 0.5)))
 
   return(tibble::tibble(
     N = N_routes,
     m1 = m1,
     m2 = m2,
-    k = k,
-    empirical_log_OR = empirical_log_or
+    k = k
   ))
 }

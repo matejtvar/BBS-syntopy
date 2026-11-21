@@ -20,6 +20,7 @@ library(targets)
 library(cluster)
 library(tibble)
 library(readxl)
+library(CooccurrenceAffinity)
 
 # 1. Syntopy on route scale ----------------------------------------------
 
@@ -51,12 +52,27 @@ route_data <- bind_cols(sympatric_pairs, route_syntopy)
 
 # Filter out pairs with no routes sampled (N == 0) for modeling
 route_data <- route_data |>
-  filter(N > 0, !is.na(empirical_log_OR))
+  filter(N > 0)
 # Note: for 2019 and 2017 there is just 1 pair with N=0, while for 2018 there are 2 pairs
+
+# Calculate empirical co-occurrence indicies - alpha_mle is not working!
+# route_data_indicies <- route_data |>
+#   dplyr::filter(m1 > 0 & m2 > 0) |>
+#   dplyr::rowwise() |>
+#   dplyr::mutate(
+#     # affinity2by2 returns a list containing alpha_mle, jaccard, sorensen, simpson
+#     res = list(CooccurrenceAffinity::affinity2by2(x = k, marg = c(m1, m2, N))),
+#     empirical_log_OR = res$alpha_mle,
+#     jaccard          = res$jaccard,
+#     sorensen         = res$sorensen,
+#     simpson          = res$simpson
+#   ) |>
+#   ungroup() |>
+#   dplyr::select(-res)
 
 # 2. Syntopy on stop scale ------------------------------------------------
 syntopic_routes <- route_data |>
-  dplyr::filter(k > 0) |>
+  dplyr::filter(k > 0) |> # only pairs co-occurring at some routes can be used
   dplyr::select(sp1, sp2)
 
 # Source the function
@@ -74,6 +90,21 @@ stop_syntopy <- map2_dfr(
     )
   }
 )
+
+# Calculate empirical co-occurrence indicies - alpha_mle is not working!
+# stop_data_indicies <- stop_syntopy |>
+#   dplyr::filter(m1 > 0 & m2 > 0) |>
+#   dplyr::rowwise() |>
+#   dplyr::mutate(
+#     # affinity2by2 returns a list containing alpha_mle, jaccard, sorensen, simpson
+#     res = list(CooccurrenceAffinity::affinity2by2(x = k, marg = c(m1, m2, N))),
+#     empirical_log_OR = res$alpha_mle,
+#     jaccard          = res$jaccard,
+#     sorensen         = res$sorensen,
+#     simpson          = res$simpson
+#   ) |>
+#   ungroup() |>
+#   dplyr::select(-res)
 
 # 3. Range symmetry and other range metrics -------------------------------
 
@@ -117,6 +148,8 @@ range_metrics <- range_metrics |>
 # # Convert to a standard square matrix for easy lookup
 # gower_matrix <- as.matrix(gower_dist)
 # gawdis package?
+
+
 
 # 5. Environmental predictors ---------------------------------------------
 # list2env(c(data_import, syntopy_predictors), envir = environment())

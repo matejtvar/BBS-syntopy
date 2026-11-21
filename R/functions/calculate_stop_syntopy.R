@@ -2,7 +2,6 @@ library(sf)
 library(dplyr)
 library(tidyr)
 library(assertthat)
-
 #' Calculate Route-Specific Stop-Level Counts for Micro-Scale Syntopy Modeling
 #'
 #' Extracts stop-level N, m1, m2, and k across 50 BBS stops separately for each route
@@ -97,14 +96,9 @@ calculate_stop_syntopy <- function(sp1, sp2, bbs_dat) {
     ) |>
     dplyr::mutate(
       sp1 = sp1,
-      sp2 = sp2,
-      a = k,
-      b = m1 - k,
-      c = m2 - k,
-      d = N - m1 - m2 + k,
-      empirical_log_OR = log(((a + 0.5) * (d + 0.5)) / ((b + 0.5) * (c + 0.5)))
+      sp2 = sp2
     ) |>
-    dplyr::select(sp1, sp2, RTENO, N, m1, m2, k, empirical_log_OR)
+    dplyr::select(sp1, sp2, RTENO, N, m1, m2, k)
 
   return(route_summary)
 }

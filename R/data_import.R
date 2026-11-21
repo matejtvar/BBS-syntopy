@@ -190,19 +190,19 @@ ranges_sf <- dplyr::bind_rows(ranges)
 species_1 <- "Piranga flava"
 species_2 <- "Piranga rubra"
 
-ranges_sf |>
-  dplyr::filter(scientific_name %in% c(species_1, species_2)) |>
-  dplyr::filter(season == "breeding") |>
-  ggplot() +
-  geom_sf(aes(fill = scientific_name), alpha = 0.5, color = "black") +
-  theme_minimal() +
-  scale_fill_manual(
-    values = stats::setNames(c("firebrick", "steelblue"), c(species_1, species_2))
-  ) +
-  labs(
-    title = "Test Dataset Range Overlap",
-    fill = "Species"
-  )
+# ranges_sf |>
+#   dplyr::filter(scientific_name %in% c(species_1, species_2)) |>
+#   dplyr::filter(season == "breeding") |>
+#   ggplot() +
+#   geom_sf(aes(fill = scientific_name), alpha = 0.5, color = "black") +
+#   theme_minimal() +
+#   scale_fill_manual(
+#     values = stats::setNames(c("firebrick", "steelblue"), c(species_1, species_2))
+#   ) +
+#   labs(
+#     title = "Test Dataset Range Overlap",
+#     fill = "Species"
+#   )
 
 # 5. Check the number of valid pairs for analysis -------------------------
 

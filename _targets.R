@@ -3,7 +3,8 @@ library(targets)
 tar_option_set(
   packages = c(
     "dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr",
-    "ggplot2", "tidyr", "ape", "here", "readxl", "tibble", "cluster"
+    "ggplot2", "tidyr", "ape", "here", "readxl", "tibble", "cluster",
+    "brms"
   ),
   format = "rds"
 )
@@ -39,5 +40,18 @@ list(
       # Execute syntopy predictors script and return its final output list
       source(here::here("R/syntopy_predictors.R"), local = TRUE)$value
     }
-  )
+),
+
+# 4. Fit Models Target: Sources R/fit_models.R
+tar_target(
+  fit_models,
+  {
+    # Unpack all objects from data_import directly into this target's execution environment
+    # (Makes dat, sympatric_pairs, ranges, gower_matrix, etc., directly available)
+    list2env(syntopy_predictors, envir = environment())
+
+    # Execute syntopy predictors script and return its final output list
+    source(here::here("R/fit_models.R"), local = TRUE)$value
+  }
+)
 )
