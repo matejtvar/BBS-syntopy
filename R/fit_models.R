@@ -180,6 +180,64 @@ summary(brm_stop_fit)
 fixef(brm_stop_fit)
 plot(brm_stop_fit)
 
+# Productivity
+stop_data_2 <- stop_data |>
+  dplyr::left_join(range_metrics, by = c("sp1", "sp2")) |>
+  dplyr::filter(m1 > 0 & m2 > 0) |>
+  dplyr::filter(is.na(NDVI_filled) == FALSE)
+
+hist(stop_data_2$NDVI_filled)
+
+# Scale predictors and ensure integer constraints
+stop_data_2 <- stop_data_2 |>
+  mutate(
+    pair_id = paste(sp1, sp2, sep = "__"),
+    k  = as.integer(k),
+    m1 = as.integer(m1),
+    m2 = as.integer(m2),
+    N  = as.integer(N),
+    z_age      = as.numeric(scale(age_myr)),
+    z_sympatry = as.numeric(scale(sympatry)),
+    z_symmetry = as.numeric(scale(symmetry)),
+    z_ndvi = as.numeric(scale(NDVI_filled))
+  )
+
+# Sanity checks for physical bounds
+stopifnot(all(stop_data_2$k >= (stop_data_2$m1 + stop_data_2$m2 - stop_data_2$N)))
+stopifnot(all(stop_data_2$k <= stop_data_2$m1))
+stopifnot(all(stop_data_2$k <= stop_data_2$m2))
+stopifnot(all(stop_data_2$N > 0))
+
+# Define custom family
+fisher_hyper <- custom_family(
+  "fisher_hyper",
+  dpars = "mu",
+  links = "log",
+  type = "int",
+  vars = c("vint1[n]", "vint2[n]", "vint3[n]")
+)
+
+stop_model_2 <- brm(
+  formula = k | vint(m1, m2, N) ~ z_age + z_sympatry + z_symmetry + z_prod + (1 | pair_id),
+  data = stop_data_2,
+  family = fisher_hyper,
+  stanvars = stan_fisher,
+  prior = c(
+    prior(normal(0, 3), class = "b"),
+    prior(normal(0, 3), class = "Intercept"),
+    prior(exponential(1), class = "sd")
+  ),
+  chains = 4,
+  iter = 3000,
+  warmup = 2000,
+  cores = 4
+)
+
+summary(stop_model_2)
+fixef(stop_model_2)
+plot(stop_model_2)
+
+
 
 list(
   route_model = brm.fit,

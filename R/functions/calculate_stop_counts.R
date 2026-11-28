@@ -12,8 +12,8 @@ library(assertthat)
 #' @param bbs_dat Spatial sf object of BBS observations containing RTENO, Year,
 #'   Scientific_Name, geometry, and Stop1 through Stop50 columns.
 #'
-#' @return A tibble with one row per route containing RTENO, N, m1, m2, k, and empirical_log_OR
-calculate_stop_syntopy <- function(sp1, sp2, bbs_dat) {
+#' @return A tibble with one row per route containing RTENO, N, m1, m2 and k
+calculate_stop_counts <- function(sp1, sp2, bbs_dat) {
 
   # --- Assertions ---
   assert_that(is.character(sp1) && length(sp1) == 1 && nchar(sp1) > 0,
@@ -32,17 +32,6 @@ calculate_stop_syntopy <- function(sp1, sp2, bbs_dat) {
     dplyr::filter(Scientific_Name %in% c(sp1, sp2)) |>
     dplyr::pull(RTENO) |>
     unique()
-
-  if (length(relevant_routes) == 0) {
-    return(tibble::tibble(
-      RTENO = character(0),
-      N = integer(0),
-      m1 = integer(0),
-      m2 = integer(0),
-      k = integer(0),
-      empirical_log_OR = numeric(0)
-    ))
-  }
 
   # 2. Create a complete grid of Route x Stop for the relevant routes (50 stops per route)
   stop_names <- paste0("Stop", 1:50)

@@ -13,8 +13,8 @@ library(assertthat)
 #' @param bbs_dat Spatial sf object of BBS observations (RTENO, Year, Scientific_Name, geometry)
 #' @param season_filter Seasons to include (default: c("breeding", "resident"))
 #'
-#' @return A 1-row tibble with N, m1, m2, k
-calculate_route_syntopy <- function(sp1, sp2, range_list, bbs_dat, season_filter = c("breeding", "resident")) {
+#' @return A 1-row tibble with N, m1, m2 and k
+calculate_route_counts <- function(sp1, sp2, range_list, bbs_dat, season_filter = c("breeding", "resident")) {
 
   # --- Assertions ---
   assert_that(is.character(sp1) && length(sp1) == 1 && nchar(sp1) > 0,

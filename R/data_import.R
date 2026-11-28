@@ -265,12 +265,15 @@ route_syntopy_summary <- route_syntopy_by_year |>
   dplyr::group_by(Year) |>
   dplyr::summarise(pairs_sharing_routes = dplyr::n_distinct(sp1, sp2))
 
+sister_pairs <- sister_pairs |>
+  dplyr::mutate(pair_id = paste(sp1, sp2, sep = "__")) |>
+  dplyr::select(sp1, sp2, pair_id)
+
 # 6. Import environmental predictors ---------------------------------------------
 
 # Read the GeoPackage prepared in jupyter notebook 'get_ndvi.ipynb'
 ndvi_sf <- st_read(here::here("python/ndvi_data.gpkg"))
 str(ndvi_sf)
-summary(ndvi_sf$NDVI_filled)
 
 # 7. Import Avoniche and Avonet -------------------------------------------
 
@@ -283,6 +286,16 @@ avoniche <- avoniche |>
   dplyr::filter(Species2 %in% sister_names) |>
   dplyr::select(-Order2, -Avibase_id)
 
+pair_lookup <- sister_pairs |>
+  pivot_longer(
+    cols = c(sp1, sp2),
+    names_to = "role",
+    values_to = "Species2"
+  )
+
+avoniche <- avoniche |>
+  inner_join(pair_lookup, by = "Species2")
+
 # Avonet data
 # Available here: https://figshare.com/s/b990722d72a26b5bfead
 
@@ -292,6 +305,8 @@ avonet <- avonet |>
   dplyr::filter(Species2 %in% sister_names) |>
   dplyr::select(-Order2, -Avibase.ID2)
 
+avonet <- avonet |>
+  inner_join(pair_lookup, by = "Species2")
 
 # End list
 

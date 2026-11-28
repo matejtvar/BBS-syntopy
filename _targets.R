@@ -2,13 +2,16 @@ library(targets)
 
 tar_option_set(
   packages = c(
-    "dplyr", "sf", "ebirdst", "clootl", "diverge", "purrr",
-    "ggplot2", "tidyr", "ape", "here", "readxl", "tibble", "cluster",
-    "brms"
+    # Core & spatial
+    "dplyr", "sf", "tidyr", "purrr", "tibble", "here", "readxl", "ggplot2",
+    # Phylogeny, ranges & traits
+    "ebirdst", "clootl", "diverge", "ape", "phytools", "cluster",
+    "CooccurrenceAffinity", "gawdis", "FD",
+    # Visualization & modeling
+    "factoextra", "gridExtra", "corrplot", "brms"
   ),
   format = "rds"
 )
-# tar_source()
 
 list(
   # 1. Track raw input files and directories as file targets
@@ -18,40 +21,56 @@ list(
   tar_target(avoniche_file, "data/Avoniche2_eBird2021.csv", format = "file"),
   tar_target(avonet_file, "data/AVONET Supplementary dataset 1.xlsx", format = "file"),
 
-  # 2. Data Import & Initial Filtering Target: Sources R/data_import.R
+  # 2. Track helper function scripts for each pipeline stage
+  tar_target(
+    import_funcs,
+    c(
+      "R/functions/extract_age.R",
+      "R/functions/calculate_sympatry.R"
+    ),
+    format = "file"
+  ),
+
+  tar_target(
+    predictor_funcs,
+    c(
+      "R/functions/calculate_route_counts.R",
+      "R/functions/calculate_stop_counts.R",
+      "R/functions/calculate_symmetry.R",
+      "R/functions/calculate_cen_dist.R"
+    ),
+    format = "file"
+  ),
+
+  # 3. Data Import & Initial Filtering Target
   tar_target(
     data_import,
     {
       file_deps <- c(bbs_file, taxonomy_dir, ebirdst_dir, avoniche_file, avonet_file)
+      func_deps <- import_funcs
 
-      # Execute data import script locally and capture its returned list of objects
       source(here::here("R/data_import.R"), local = TRUE)$value
     }
   ),
 
-  # 3. Syntopy Predictors Target: Sources R/syntopy_predictors.R
+  # 4. Syntopy Predictors Target
   tar_target(
     syntopy_predictors,
     {
-      # Unpack all objects from data_import directly into this target's execution environment
-      # (Makes dat, sympatric_pairs, ranges, gower_matrix, etc., directly available)
+      func_deps <- predictor_funcs
       list2env(data_import, envir = environment())
 
-      # Execute syntopy predictors script and return its final output list
       source(here::here("R/syntopy_predictors.R"), local = TRUE)$value
     }
-),
+  ),
 
-# 4. Fit Models Target: Sources R/fit_models.R
-tar_target(
-  fit_models,
-  {
-    # Unpack all objects from data_import directly into this target's execution environment
-    # (Makes dat, sympatric_pairs, ranges, gower_matrix, etc., directly available)
-    list2env(syntopy_predictors, envir = environment())
+  # 5. Fit Models Target
+  tar_target(
+    fit_models,
+    {
+      list2env(syntopy_predictors, envir = environment())
 
-    # Execute syntopy predictors script and return its final output list
-    source(here::here("R/fit_models.R"), local = TRUE)$value
-  }
-)
+      source(here::here("R/fit_models.R"), local = TRUE)$value
+    }
+  )
 )
